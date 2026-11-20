@@ -25,3 +25,7 @@ evidencias/**/*.backup
 .vscode/
 .idea/
 .DS_Store
+
+# Salida de pipeline/transform/aplanar.py (derivada de data/raw)
+data/stage/*
+!data/stage/.gitkeep
