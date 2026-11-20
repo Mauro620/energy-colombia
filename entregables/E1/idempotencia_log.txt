@@ -1,0 +1,120 @@
+# Segunda ejecucion de 01_ddl, 02_reglas y 03_carga sobre la base ya cargada (idempotencia)
+=== sql/01_ddl/011_tipos.sql
+--- 0 s
+=== sql/01_ddl/012_catalogos.sql
+psql:/sql/01_ddl/012_catalogos.sql:14: NOTICE:  relation "departamento" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:28: NOTICE:  relation "municipio" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:38: NOTICE:  relation "agente" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:45: NOTICE:  relation "tecnologia" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:52: NOTICE:  relation "clasificacion_recurso" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:61: NOTICE:  relation "fuente_energetica" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:69: NOTICE:  relation "version_liquidacion" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:77: NOTICE:  relation "categoria_estacion" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:84: NOTICE:  relation "tecnologia_estacion" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:91: NOTICE:  relation "entidad" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:99: NOTICE:  relation "zona_hidrografica" already exists, skipping
+psql:/sql/01_ddl/012_catalogos.sql:106: NOTICE:  relation "unidad_medida" already exists, skipping
+--- 0 s
+=== sql/01_ddl/013_entidades.sql
+psql:/sql/01_ddl/013_entidades.sql:24: NOTICE:  relation "planta" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:25: NOTICE:  relation "ix_planta_tecnologia" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:26: NOTICE:  relation "ix_planta_agente" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:37: NOTICE:  relation "capacidad_planta" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:69: NOTICE:  relation "estacion" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:70: NOTICE:  relation "ix_estacion_municipio" already exists, skipping
+psql:/sql/01_ddl/013_entidades.sql:84: NOTICE:  relation "sensor" already exists, skipping
+--- 0 s
+=== sql/01_ddl/014_hechos.sql
+psql:/sql/01_ddl/014_hechos.sql:12: NOTICE:  relation "generacion_diaria_planta" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:13: NOTICE:  relation "ix_generacion_diaria_fecha" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:25: NOTICE:  relation "generacion_horaria_planta" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:26: NOTICE:  relation "ix_generacion_horaria_fecha_hora" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:39: NOTICE:  relation "generacion_mensual_upme" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:51: NOTICE:  relation "observacion" already exists, skipping
+psql:/sql/01_ddl/014_hechos.sql:52: NOTICE:  relation "ix_observacion_sensor_fecha" already exists, skipping
+--- 1 s
+=== sql/01_ddl/015_control.sql
+psql:/sql/01_ddl/015_control.sql:17: NOTICE:  relation "carga_lote" already exists, skipping
+psql:/sql/01_ddl/015_control.sql:29: NOTICE:  relation "registro_rechazado" already exists, skipping
+psql:/sql/01_ddl/015_control.sql:30: NOTICE:  relation "ix_registro_rechazado_lote_regla" already exists, skipping
+--- 0 s
+=== sql/01_ddl/016_staging.sql
+psql:/sql/01_ddl/016_staging.sql:17: NOTICE:  relation "stg_listado_recursos" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:27: NOTICE:  relation "stg_agente" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:35: NOTICE:  relation "stg_capacidad" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:48: NOTICE:  relation "stg_gen_diaria" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:61: NOTICE:  relation "stg_gen_horaria" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:70: NOTICE:  relation "stg_divipola_dpto" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:82: NOTICE:  relation "stg_divipola_mpio" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:105: NOTICE:  relation "stg_estacion" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:116: NOTICE:  relation "stg_observacion" already exists, skipping
+psql:/sql/01_ddl/016_staging.sql:129: NOTICE:  relation "stg_upme" already exists, skipping
+--- 0 s
+=== sql/02_reglas/020_helper.sql
+--- 1 s
+=== sql/02_reglas/021_checks.sql
+--- 0 s
+=== sql/02_reglas/022_exclude_unico_parcial.sql
+psql:/sql/02_reglas/022_exclude_unico_parcial.sql:6: NOTICE:  relation "uq_carga_lote_en_curso" already exists, skipping
+--- 0 s
+=== sql/02_reglas/023_triggers.sql
+--- 0 s
+=== sql/03_carga/030_utilidades.sql
+--- 1 s
+=== sql/03_carga/031_semillas.sql
+--- 0 s
+=== sql/03_carga/032_geografia.sql
+COMMIT
+COMMIT
+--- 0 s
+=== sql/03_carga/033_agentes.sql
+COMMIT
+--- 2 s
+=== sql/03_carga/034_plantas.sql
+COMMIT
+--- 4 s
+=== sql/03_carga/035_upme.sql
+COMMIT
+--- 1 s
+=== sql/03_carga/036_capacidad.sql
+COMMIT
+--- 146 s
+=== sql/03_carga/037_gen_diaria.sql
+COMMIT
+--- 59 s
+=== sql/03_carga/038_gen_horaria.sql
+COMMIT
+--- 355 s
+=== sql/03_carga/039_estaciones.sql
+COMMIT
+--- 86 s
+=== sql/03_carga/040_observaciones.sql
+COMMIT
+--- 9 s
+
+=== Lotes de la segunda ejecucion (deben tener insertadas = 0 y actualizadas = 0)
+ lote_id |       fuente        | estado |  leidas  | ins | act |   omit   |  rech  
+---------+---------------------+--------+----------+-----+-----+----------+--------
+      16 | divipola_vcjz-niiq  | ok     |       33 |   0 |   0 |       33 |      0
+      17 | divipola_gdxc-w37w  | ok     |     1122 |   0 |   0 |     1122 |      0
+      18 | xm_ListadoAgentes   | ok     |      718 |   0 |   0 |      718 |      0
+      19 | xm_ListadoRecursos  | ok     |     2521 |   0 |   0 |     2521 |      0
+      20 | socrata_tq63-itzr   | ok     |     2786 |   0 |   0 |     2786 |      0
+      21 | xm_CapEfecNeta      | ok     |   925228 |   0 |   0 |   921213 |   4015
+      22 | simem_E17D25        | ok     |   330379 |   0 |   0 |   324744 |   5635
+      23 | simem_055A4D        | ok     | 12785568 |   0 |   0 | 12552466 | 233102
+      24 | socrata_hp9r-jxuu   | ok     |    57706 |   0 |   0 |    51536 |   6170
+      25 | ideam_observaciones | ok     |   156981 |   0 |   0 |    93667 |  63314
+(10 rows)
+
+=== Conteos de tablas del modelo
+             t             |  count  
+---------------------------+---------
+ planta                    |    2518
+ capacidad_planta          |    2568
+ generacion_diaria_planta  |  323995
+ generacion_horaria_planta | 2695786
+ observacion               |   93667
+ estacion                  |    8897
+(6 rows)
+

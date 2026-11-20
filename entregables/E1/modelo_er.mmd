@@ -1,0 +1,179 @@
+erDiagram
+  energia_departamento {
+    char_2 codigo PK
+    varchar_100 nombre UK
+    varchar_100 nombre_normalizado UK
+    numeric_12_9 latitud
+    numeric_12_9 longitud
+  }
+  energia_municipio {
+    char_5 codigo PK
+    char_2 departamento_codigo FK
+    varchar_120 nombre
+    varchar_120 nombre_normalizado
+    varchar_60 tipo
+    numeric_12_9 latitud
+    numeric_12_9 longitud
+  }
+  energia_agente {
+    char_4 codigo_sic PK
+    varchar_200 nombre
+    varchar_40 actividad
+    energia_estado_agente estado
+    date fecha_inicio_operacion
+  }
+  energia_tecnologia {
+    smallint tecnologia_id PK
+    varchar_30 nombre UK
+  }
+  energia_clasificacion_recurso {
+    smallint clasificacion_id PK
+    varchar_40 nombre UK
+  }
+  energia_fuente_energetica {
+    smallint fuente_energetica_id PK
+    varchar_30 nombre UK
+    boolean en_xm
+    boolean en_upme
+  }
+  energia_planta {
+    integer planta_id PK
+    char_4 codigo UK
+    varchar_120 nombre
+    smallint tecnologia_id FK
+    smallint fuente_energetica_id FK
+    smallint clasificacion_id FK
+    energia_tipo_despacho tipo_despacho
+    char_4 agente_codigo FK
+    energia_estado_planta estado
+    date fecha_inicio_operacion
+  }
+  energia_capacidad_planta {
+    bigint capacidad_id PK
+    integer planta_id FK
+    daterange vigencia
+    numeric_12_3 capacidad_kw
+  }
+  energia_version_liquidacion {
+    varchar_3 codigo PK
+    smallint orden UK
+    varchar_200 descripcion
+  }
+  energia_generacion_diaria_planta {
+    integer planta_id FK
+    date fecha PK
+    numeric_18_4 programada_despacho_kwh
+    numeric_18_4 programada_redespacho_kwh
+    numeric_18_4 real_estimada_kwh
+  }
+  energia_generacion_horaria_planta {
+    integer planta_id FK
+    timestamptz fecha_hora PK
+    numeric_18_4 energia_kwh
+    varchar_3 version_codigo FK
+  }
+  energia_generacion_mensual_upme {
+    date periodo PK
+    smallint fuente_energetica_id FK
+    numeric_14_6 promedio_mensual_gwh
+    numeric_14_6 maximo_gwh
+    numeric_14_6 minimo_gwh
+    numeric_14_6 generacion_total_gwh
+    boolean parcial
+  }
+  energia_categoria_estacion {
+    smallint categoria_id PK
+    varchar_60 nombre UK
+  }
+  energia_tecnologia_estacion {
+    smallint tecnologia_estacion_id PK
+    varchar_60 nombre UK
+  }
+  energia_entidad {
+    integer entidad_id PK
+    varchar_200 nombre UK
+  }
+  energia_zona_hidrografica {
+    smallint zona_hidrografica_id PK
+    varchar_60 area_hidrografica
+    varchar_80 nombre
+  }
+  energia_estacion {
+    integer estacion_id PK
+    char_10 codigo UK
+    varchar_200 nombre
+    smallint categoria_id FK
+    smallint tecnologia_estacion_id FK
+    energia_estado_estacion estado
+    char_5 municipio_codigo FK
+    integer entidad_id FK
+    smallint zona_hidrografica_id FK
+    varchar_100 subzona_hidrografica
+    varchar_120 corriente
+    varchar_100 area_operativa
+    numeric_12_9 latitud
+    numeric_12_9 longitud
+    integer altitud
+    date fecha_instalacion
+    date fecha_suspension
+  }
+  energia_unidad_medida {
+    smallint unidad_id PK
+    varchar_10 simbolo UK
+  }
+  energia_sensor {
+    smallint sensor_id PK
+    char_4 codigo UK
+    varchar_150 descripcion
+    smallint unidad_id FK
+    numeric_14_4 valor_min
+    numeric_14_4 valor_max
+    numeric_14_4_[] centinelas
+  }
+  energia_observacion {
+    integer estacion_id FK
+    smallint sensor_id FK
+    timestamptz fecha_observacion PK
+    numeric_14_4 valor
+  }
+  control_carga_lote {
+    bigint lote_id PK
+    varchar_60 fuente
+    varchar_80 tabla_destino
+    control_estado_lote estado
+    timestamptz iniciado_en
+    timestamptz finalizado_en
+    bigint filas_leidas
+    bigint filas_insertadas
+    bigint filas_actualizadas
+    bigint filas_omitidas
+    bigint filas_rechazadas
+    text mensaje
+  }
+  control_registro_rechazado {
+    bigint rechazo_id PK
+    bigint lote_id FK
+    varchar_20 regla
+    text motivo
+    jsonb registro
+    timestamptz rechazado_en
+  }
+  energia_municipio }o--|| energia_departamento : "departamento_codigo"
+  energia_planta }o--|| energia_tecnologia : "tecnologia_id"
+  energia_planta }o--|| energia_fuente_energetica : "fuente_energetica_id"
+  energia_planta }o--|| energia_clasificacion_recurso : "clasificacion_id"
+  energia_planta }o--|| energia_agente : "agente_codigo"
+  energia_capacidad_planta }o--|| energia_planta : "planta_id"
+  energia_generacion_diaria_planta }o--|| energia_planta : "planta_id"
+  energia_generacion_horaria_planta }o--|| energia_planta : "planta_id"
+  energia_generacion_horaria_planta }o--|| energia_version_liquidacion : "version_codigo"
+  energia_generacion_mensual_upme }o--|| energia_fuente_energetica : "fuente_energetica_id"
+  energia_estacion }o--|| energia_categoria_estacion : "categoria_id"
+  energia_estacion }o--|| energia_tecnologia_estacion : "tecnologia_estacion_id"
+  energia_estacion }o--|| energia_municipio : "municipio_codigo"
+  energia_estacion }o--|| energia_entidad : "entidad_id"
+  energia_estacion }o--o| energia_zona_hidrografica : "zona_hidrografica_id"
+  energia_sensor }o--o| energia_unidad_medida : "unidad_id"
+  energia_observacion }o--|| energia_estacion : "estacion_id"
+  energia_observacion }o--|| energia_sensor : "sensor_id"
+  control_registro_rechazado }o--|| control_carga_lote : "lote_id"

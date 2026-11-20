@@ -2,11 +2,15 @@
 
 Proyecto final de Administracion de Bases de Datos. Datos abiertos oficiales de XM, UPME e IDEAM (portal datos.gov.co y SIMEM).
 
-## Fase actual: 0, descubrimiento de fuentes
+## Fase actual: Entrega 1 (modelo, ingesta y reglas)
 
-El modelo de datos **todavia no esta definido**. Esta fase descarga metadata y muestras, las perfila y responde las preguntas P01-P16 de `docs/Integridad_Restricciones_Energia.xlsx` (hoja `Preguntas_fuentes`). Ver `docs/decisiones/0001-fase-descubrimiento.md`.
+La fase 0 (descubrimiento, `docs/decisiones/0001`) cerro con `docs/fuentes/hallazgos.md`. El modelo, el DDL, la carga y las pruebas estan en `docs/modelo/`, `sql/` y `entregables/E1/` (ver `entregables/E1/README_E1.md`). Decisiones y supuestos: `docs/decisiones/0002-modelo-e1.md`.
 
-Salidas: `docs/fuentes/` (una ficha `<id>.md` y un `perfil_<id>.md` por dataset, `perfil_columnas.csv`, `hallazgos.md`).
+```bash
+make e1          # (o bash scripts/e1.sh) recrea energia_db, aplana data/raw, ejecuta sql/00..05 y guarda evidencias/E1/ejecucion_<fecha>.log
+bash scripts/xlsx_e1.sh        # llena las hojas del modelo del xlsx desde la base ya creada
+bash scripts/empaquetar_e1.sh  # arma entregables/E1/
+```
 
 ## Entorno
 

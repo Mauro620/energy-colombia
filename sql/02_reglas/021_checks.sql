@@ -8,7 +8,7 @@ CALL control.agregar_restriccion('energia.municipio', 'ck_municipio_codigo', $$C
 -- RN08 (H08) El codigo DANE del municipio empieza con el codigo de su departamento.
 CALL control.agregar_restriccion('energia.municipio', 'ck_municipio_prefijo_depto', $$CHECK (left(codigo, 2) = departamento_codigo)$$);
 
--- RN05 (H06, H14) Formato de codigos: planta y agente 4 caracteres; estacion 10 digitos (ceros a la izquierda); sensor 4 digitos.
+-- RN05 (H06, H14, H21) Formato de codigos: planta y agente 4 caracteres; estacion 10 digitos (ceros a la izquierda); sensor 4 digitos.
 CALL control.agregar_restriccion('energia.planta', 'ck_planta_codigo', $$CHECK (codigo ~ '^[A-Z0-9]{4}$')$$);
 CALL control.agregar_restriccion('energia.agente', 'ck_agente_codigo', $$CHECK (codigo_sic ~ '^[A-Z0-9]{4}$')$$);
 CALL control.agregar_restriccion('energia.estacion', 'ck_estacion_codigo', $$CHECK (codigo ~ '^[0-9]{10}$')$$);
@@ -58,3 +58,6 @@ CALL control.agregar_restriccion('control.carga_lote', 'ck_carga_lote_contadores
            AND (estado <> 'ok' OR filas_leidas = filas_insertadas + filas_actualizadas + filas_omitidas + filas_rechazadas))$$);
 CALL control.agregar_restriccion('control.carga_lote', 'ck_carga_lote_fechas',
   $$CHECK ((estado = 'en_curso') = (finalizado_en IS NULL) AND (finalizado_en IS NULL OR finalizado_en >= iniciado_en))$$);
+
+-- Nota: las FK (RN17, H22 y H18: toda planta que genera y toda estacion que observa existe en su catalogo) estan en sql/01_ddl.
+-- Los ENUM (RN15, H06) estan en sql/01_ddl/011_tipos.sql. UNIQUE de claves de negocio (H21, H11, H02) tambien estan en 01_ddl.

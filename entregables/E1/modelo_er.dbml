@@ -1,0 +1,386 @@
+// MODELO ER FINAL (E1) - PostgreSQL. Fuente unica de verdad del diagrama, del diccionario y de modelo_er.mmd
+// (scripts/gen_modelo.py los genera desde este archivo). Visualizar: https://dbdiagram.io/d
+//
+// Convencion de notas en columnas:  note: 'src=<fuente.columna de origen> || rule=<regla>'
+//   src  = columna documentada en docs/fuentes (o "-" si es surrogate/derivada)
+//   rule = restricciones y codigo de regla (RNxx) que la protegen; los RN estan en sql/02_reglas
+// Esquemas: staging (texto crudo aplanado), energia (modelo), control (cargas y cuarentena); analitica = solo vistas.
+// Decisiones: docs/decisiones/0002-modelo-e1.md
+
+Project energia_db {
+  database_type: 'PostgreSQL'
+  Note: 'Sistema energetico colombiano. XM (SIMEM + API), UPME e IDEAM, DIVIPOLA del DANE.'
+}
+
+// ------------------------------------------------------------------ ENUM
+Enum energia.estado_planta {
+  OPERACION
+  PRUEBAS
+}
+
+Enum energia.tipo_despacho {
+  "DESPACHADO CENTRALMENTE"
+  "NO DESPACHADO CENTRALMENTE"
+}
+
+Enum energia.estado_agente {
+  OPERACION
+  INACTIVO
+}
+
+Enum energia.estado_estacion {
+  ACTIVA
+  SUSPENDIDA
+  "EN MANTENIMIENTO"
+}
+
+Enum control.estado_lote {
+  en_curso
+  ok
+  error
+}
+
+// ------------------------------------------------------------------ GEOGRAFIA (D05)
+Table energia.departamento {
+  codigo char(2) [pk, note: 'src=divipola_vcjz-niiq.codigo_departamento || rule=CHECK 2 digitos (RN16)']
+  nombre varchar(100) [not null, unique, note: 'src=divipola_vcjz-niiq.nombre_departamento || rule=UNIQUE']
+  nombre_normalizado varchar(100) [not null, unique, note: 'src=- || rule=derivada GENERATED: upper+unaccent+trim de nombre. Clave de cruce con IDEAM (DQ14). Redundancia deliberada: columna calculada, no puede desincronizarse']
+  latitud numeric(12,9) [note: 'src=divipola_vcjz-niiq.latitud || rule=CHECK dentro de Colombia (RN07); la fuente usa coma decimal']
+  longitud numeric(12,9) [note: 'src=divipola_vcjz-niiq.longitud || rule=CHECK dentro de Colombia (RN07)']
+}
+
+Table energia.municipio {
+  codigo char(5) [pk, note: 'src=divipola_gdxc-w37w.cod_mpio || rule=CHECK 5 digitos y prefijo = departamento_codigo (RN08, H08)']
+  departamento_codigo char(2) [not null, ref: > energia.departamento.codigo, note: 'src=divipola_gdxc-w37w.cod_dpto || rule=FK ON UPDATE CASCADE ON DELETE RESTRICT']
+  nombre varchar(120) [not null, note: 'src=divipola_gdxc-w37w.nom_mpio']
+  nombre_normalizado varchar(120) [not null, note: 'src=- || rule=derivada GENERATED (upper+unaccent+trim+sin puntuacion). UNIQUE con departamento_codigo']
+  tipo varchar(60) [not null, note: 'src=divipola_gdxc-w37w.tipo_municipio']
+  latitud numeric(12,9) [note: 'src=divipola_gdxc-w37w.latitud || rule=CHECK dentro de Colombia (RN07)']
+  longitud numeric(12,9) [note: 'src=divipola_gdxc-w37w.longitud || rule=CHECK dentro de Colombia (RN07)']
+
+  indexes {
+    (departamento_codigo, nombre_normalizado) [unique, name: 'uq_municipio_depto_nombre']
+  }
+}
+
+// ------------------------------------------------------------------ CATALOGOS DE XM
+Table energia.agente {
+  codigo_sic char(4) [pk, note: 'src=xm_ListadoAgentes.Code || rule=CHECK 4 caracteres alfanumericos. Dedup: 5 codigos repetidos, queda la fila OPERACION mas reciente (S-05)']
+  nombre varchar(200) [not null, note: 'src=xm_ListadoAgentes.Name || rule=mayusculas']
+  actividad varchar(40) [not null, note: 'src=xm_ListadoAgentes.Activity']
+  estado energia.estado_agente [not null, note: 'src=xm_ListadoAgentes.State || rule=ENUM']
+  fecha_inicio_operacion date [not null, note: 'src=xm_ListadoAgentes.OperStartdate']
+}
+
+Table energia.tecnologia {
+  tecnologia_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(30) [not null, unique, note: 'src=xm_ListadoRecursos.Type || rule=UNIQUE, mayusculas (Solar=SOLAR). Coincide 1:1 con F01.TipoGeneracion']
+}
+
+Table energia.clasificacion_recurso {
+  clasificacion_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(40) [not null, unique, note: 'src=xm_ListadoRecursos.RecType || rule=UNIQUE, mayusculas']
+}
+
+Table energia.fuente_energetica {
+  fuente_energetica_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(30) [not null, unique, note: 'src=xm_ListadoRecursos.EnerSource, socrata_tq63-itzr.fuente || rule=UNIQUE. Mapeo XM-UPME por igualdad de nombre (12 de 12 coinciden; OTROS solo existe en UPME)']
+  en_xm boolean [not null, note: 'src=- || rule=aparece en el listado de recursos de XM']
+  en_upme boolean [not null, note: 'src=- || rule=aparece en UPME']
+}
+
+Table energia.planta {
+  planta_id integer [pk, increment, note: 'src=- || rule=surrogate']
+  codigo char(4) [not null, unique, note: 'src=xm_ListadoRecursos.Code || rule=UNIQUE; CHECK 4 caracteres [A-Z0-9] (RN05, H06). Dedup: 3 codigos repetidos (S-04)']
+  nombre varchar(120) [not null, note: 'src=xm_ListadoRecursos.Name || rule=mayusculas']
+  tecnologia_id smallint [not null, ref: > energia.tecnologia.tecnologia_id, note: 'src=xm_ListadoRecursos.Type || rule=FK RESTRICT. Una sola tecnologia por planta (H06)']
+  fuente_energetica_id smallint [not null, ref: > energia.fuente_energetica.fuente_energetica_id, note: 'src=xm_ListadoRecursos.EnerSource || rule=FK RESTRICT']
+  clasificacion_id smallint [not null, ref: > energia.clasificacion_recurso.clasificacion_id, note: 'src=xm_ListadoRecursos.RecType || rule=FK RESTRICT']
+  tipo_despacho energia.tipo_despacho [not null, note: 'src=xm_ListadoRecursos.Disp || rule=ENUM']
+  agente_codigo char(4) [not null, ref: > energia.agente.codigo_sic, note: 'src=xm_ListadoRecursos.CompanyCode || rule=FK RESTRICT. Un operador por planta (H06). 149 de 149 codigos existen en ListadoAgentes']
+  estado energia.estado_planta [not null, note: 'src=xm_ListadoRecursos.State || rule=ENUM (Operacion=OPERACION)']
+  fecha_inicio_operacion date [not null, note: 'src=xm_ListadoRecursos.OperStartdate']
+}
+
+Table energia.capacidad_planta {
+  capacidad_id bigint [pk, increment, note: 'src=- || rule=surrogate']
+  planta_id integer [not null, ref: > energia.planta.planta_id, note: 'src=xm_CapEfecNeta.Code || rule=FK ON DELETE CASCADE (la capacidad no existe sin la planta)']
+  vigencia daterange [not null, note: 'src=xm_CapEfecNeta.Date || rule=dias consecutivos con el mismo valor compactados en un rango [inicio, fin+1). EXCLUDE: sin solapes por planta (RN03)']
+  capacidad_kw numeric(12,3) [not null, note: 'src=xm_CapEfecNeta.Value || rule=CHECK > 0 (RN02, H03). Unidad kW segun ListadoMetricas']
+}
+
+Table energia.version_liquidacion {
+  codigo varchar(3) [pk, note: 'src=simem_055A4D.Version || rule=CHECK ^TX[0-9FR]$']
+  orden smallint [not null, unique, note: 'src=- || rule=SUPUESTO S-01: TX1<TX2<TXR<TXF<TX3<TX4 (disponibilidad observada + noticias XM). CHECK > 0']
+  descripcion varchar(200) [not null, note: 'src=- || rule=texto explicativo']
+}
+
+// ------------------------------------------------------------------ HECHOS DE GENERACION (D02-rev)
+Table energia.generacion_diaria_planta {
+  planta_id integer [not null, ref: > energia.planta.planta_id, note: 'src=simem_E17D25.CodigoPlanta || rule=FK RESTRICT. Plantas fuera del listado van a cuarentena']
+  fecha date [not null, note: 'src=simem_E17D25.Fecha || rule=fecha de operacion (hora Colombia)']
+  programada_despacho_kwh numeric(18,4) [not null, note: 'src=simem_E17D25.GeneracionProgramadaDespacho || rule=CHECK >= 0 (RN01, H01). Unidad kWh']
+  programada_redespacho_kwh numeric(18,4) [not null, note: 'src=simem_E17D25.GeneracionProgramadaRedespacho || rule=CHECK >= 0 (RN01, H01)']
+  real_estimada_kwh numeric(18,4) [not null, note: 'src=simem_E17D25.GeneracionRealEstimada || rule=CHECK >= 0 (RN01, H01). Estimacion SCADA']
+
+  indexes {
+    (planta_id, fecha) [pk, name: 'pk_generacion_diaria_planta']
+    fecha
+  }
+  Note: 'Una fila por planta y dia (H02). TipoGeneracion, TipoClasificacion y TipoDespachoRecurso de F01 no se guardan: dependen de la planta (3FN) y TipoClasificacion cambia en el tiempo en 252 plantas.'
+}
+
+Table energia.generacion_horaria_planta {
+  planta_id integer [not null, ref: > energia.planta.planta_id, note: 'src=simem_055A4D.CodigoPlanta || rule=FK RESTRICT']
+  fecha_hora timestamptz [not null, note: 'src=simem_055A4D.FechaHora || rule=hora exacta (RN04, H04); el origen es hora Colombia sin zona: se interpreta America/Bogota y se guarda en UTC (D11)']
+  energia_kwh numeric(18,4) [not null, note: 'src=simem_055A4D.Valor || rule=CHECK >= 0 (RN01); trigger: <= capacidad vigente x 1.10 (RN10, H03)']
+  version_codigo varchar(3) [not null, ref: > energia.version_liquidacion.codigo, note: 'src=simem_055A4D.Version || rule=FK ON UPDATE CASCADE; trigger: solo reemplaza por version de orden igual o mayor (RN09, H02)']
+
+  indexes {
+    (planta_id, fecha_hora) [pk, name: 'pk_generacion_horaria_planta']
+    fecha_hora
+  }
+  Note: 'Una fila por (planta, hora): la version vigente (D02-rev). El origen trae hasta 6 versiones por punto.'
+}
+
+// ------------------------------------------------------------------ UPME (D09)
+Table energia.generacion_mensual_upme {
+  periodo date [not null, note: 'src=socrata_tq63-itzr.ano,mes || rule=make_date(ano, mes, 1); CHECK dia 1 (RN06)']
+  fuente_energetica_id smallint [not null, ref: > energia.fuente_energetica.fuente_energetica_id, note: 'src=socrata_tq63-itzr.fuente || rule=FK RESTRICT']
+  promedio_mensual_gwh numeric(14,6) [not null, note: 'src=socrata_tq63-itzr.promedio_mensual_gwh || rule=CHECK >= 0']
+  maximo_gwh numeric(14,6) [not null, note: 'src=socrata_tq63-itzr.maximo_gwh || rule=CHECK >= 0']
+  minimo_gwh numeric(14,6) [not null, note: 'src=socrata_tq63-itzr.minimo_gwh || rule=CHECK >= 0 y <= maximo_gwh']
+  generacion_total_gwh numeric(14,6) [not null, note: 'src=socrata_tq63-itzr.generacion_total_gwh || rule=CHECK >= 0 (RN01)']
+  parcial boolean [not null, note: 'src=- || rule=true para el ultimo mes publicado (D09). Dato derivado de la carga: el mes puede completarse en publicaciones futuras']
+
+  indexes {
+    (periodo, fuente_energetica_id) [pk, name: 'pk_generacion_mensual_upme']
+  }
+  Note: 'porcentaje_participacion NO se almacena: se calcula en analitica.v_participacion_mensual_upme (D09, H12).'
+}
+
+// ------------------------------------------------------------------ IDEAM
+Table energia.categoria_estacion {
+  categoria_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(60) [not null, unique, note: 'src=socrata_hp9r-jxuu.categoria || rule=UNIQUE']
+}
+
+Table energia.tecnologia_estacion {
+  tecnologia_estacion_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(60) [not null, unique, note: 'src=socrata_hp9r-jxuu.tecnologia || rule=UNIQUE. No es tecnologia de generacion']
+}
+
+Table energia.entidad {
+  entidad_id integer [pk, increment, note: 'src=- || rule=surrogate']
+  nombre varchar(200) [not null, unique, note: 'src=socrata_hp9r-jxuu.entidad || rule=UNIQUE']
+}
+
+Table energia.zona_hidrografica {
+  zona_hidrografica_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  area_hidrografica varchar(60) [not null, note: 'src=socrata_hp9r-jxuu.area_hidrografica']
+  nombre varchar(80) [not null, note: 'src=socrata_hp9r-jxuu.zona_hidrografica']
+
+  indexes {
+    (area_hidrografica, nombre) [unique, name: 'uq_zona_hidrografica']
+  }
+}
+
+Table energia.estacion {
+  estacion_id integer [pk, increment, note: 'src=- || rule=surrogate']
+  codigo char(10) [not null, unique, note: 'src=socrata_hp9r-jxuu.codigo || rule=UNIQUE; CHECK 10 digitos (RN05, H14). El catalogo trae 8 o 10 digitos del mismo codigo: se normaliza con lpad a 10 (S-06)']
+  nombre varchar(200) [not null, note: 'src=socrata_hp9r-jxuu.nombre']
+  categoria_id smallint [not null, ref: > energia.categoria_estacion.categoria_id, note: 'src=socrata_hp9r-jxuu.categoria || rule=FK RESTRICT']
+  tecnologia_estacion_id smallint [not null, ref: > energia.tecnologia_estacion.tecnologia_estacion_id, note: 'src=socrata_hp9r-jxuu.tecnologia || rule=FK RESTRICT']
+  estado energia.estado_estacion [not null, note: 'src=socrata_hp9r-jxuu.estado || rule=ENUM']
+  municipio_codigo char(5) [not null, ref: > energia.municipio.codigo, note: 'src=socrata_hp9r-jxuu.departamento,municipio || rule=FK RESTRICT; cruce por nombre normalizado con DIVIPOLA (D05); sin cruce = cuarentena']
+  entidad_id integer [not null, ref: > energia.entidad.entidad_id, note: 'src=socrata_hp9r-jxuu.entidad || rule=FK RESTRICT']
+  zona_hidrografica_id smallint [ref: > energia.zona_hidrografica.zona_hidrografica_id, note: 'src=socrata_hp9r-jxuu.area_hidrografica,zona_hidrografica || rule=FK RESTRICT']
+  subzona_hidrografica varchar(100) [note: 'src=socrata_hp9r-jxuu.subzona_hidrografica || rule=redundancia aceptada: subzona -> zona es una dependencia transitiva que se deja como texto (sin catalogo propio) por no tener otros atributos']
+  corriente varchar(120) [note: 'src=socrata_hp9r-jxuu.corriente']
+  area_operativa varchar(100) [note: 'src=socrata_hp9r-jxuu.area_operativa']
+  latitud numeric(12,9) [not null, note: 'src=socrata_hp9r-jxuu.latitud || rule=CHECK dentro de Colombia (RN07, H07, H15). ubicaci_n se descarta (invertida)']
+  longitud numeric(12,9) [not null, note: 'src=socrata_hp9r-jxuu.longitud || rule=CHECK dentro de Colombia (RN07, H07)']
+  altitud integer [note: 'src=socrata_hp9r-jxuu.altitud || rule=CHECK entre 0 y 6000 m']
+  fecha_instalacion date [note: 'src=socrata_hp9r-jxuu.fecha_instalacion || rule=origen dd/mm/yyyy, to_date (H17, DQ11)']
+  fecha_suspension date [note: 'src=socrata_hp9r-jxuu.fecha_suspension || rule=CHECK >= fecha_instalacion (RN12)']
+}
+
+Table energia.unidad_medida {
+  unidad_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  simbolo varchar(10) [not null, unique, note: 'src=socrata_57sv-p2fu.unidadmedida || rule=UNIQUE']
+}
+
+Table energia.sensor {
+  sensor_id smallint [pk, increment, note: 'src=- || rule=surrogate']
+  codigo char(4) [not null, unique, note: 'src=socrata_57sv-p2fu.codigosensor || rule=UNIQUE; CHECK 4 digitos (ceros a la izquierda)']
+  descripcion varchar(150) [note: 'src=socrata_57sv-p2fu.descripcionsensor || rule=nulo en el sensor 0245 (el origen no lo trae)']
+  unidad_id smallint [ref: > energia.unidad_medida.unidad_id, note: 'src=socrata_57sv-p2fu.unidadmedida || rule=FK RESTRICT; nulo en 0245']
+  valor_min numeric(14,4) [note: 'src=- || rule=rango plausible (D08), definido en docs/decisiones/0002; nulo en 0245']
+  valor_max numeric(14,4) [note: 'src=- || rule=CHECK valor_max > valor_min (RN11)']
+  centinelas numeric(14,4)[] [not null, note: 'src=- || rule=valores que significan dato faltante (D08): -9998, -9999 y los propios del sensor']
+}
+
+Table energia.observacion {
+  estacion_id integer [not null, ref: > energia.estacion.estacion_id, note: 'src=socrata_57sv-p2fu.codigoestacion || rule=FK RESTRICT; lpad 10 (S-06); huerfana = cuarentena (DQ15, H18)']
+  sensor_id smallint [not null, ref: > energia.sensor.sensor_id, note: 'src=socrata_57sv-p2fu.codigosensor || rule=FK RESTRICT']
+  fecha_observacion timestamptz [not null, note: 'src=socrata_57sv-p2fu.fechaobservacion || rule=origen sin zona = America/Bogota (D11, DQ10); UTC al guardar']
+  valor numeric(14,4) [not null, note: 'src=socrata_57sv-p2fu.valorobservado || rule=centinelas no se cargan (DQ08); trigger: dentro del rango del sensor (RN11, DQ09)']
+
+  indexes {
+    (estacion_id, sensor_id, fecha_observacion) [pk, name: 'pk_observacion']
+    (sensor_id, fecha_observacion)
+  }
+  Note: 'Una observacion por estacion, sensor e instante (H11).'
+}
+
+// ------------------------------------------------------------------ CONTROL
+Table control.carga_lote {
+  lote_id bigint [pk, increment, note: 'src=- || rule=surrogate']
+  fuente varchar(60) [not null, note: 'src=- || rule=carpeta de data/raw o dataset (ej. simem_055A4D)']
+  tabla_destino varchar(80) [not null, note: 'src=- || rule=tabla del modelo que se carga']
+  estado control.estado_lote [not null, note: 'src=- || rule=ENUM. UNIQUE parcial: un solo lote en_curso por fuente (RN13)']
+  iniciado_en timestamptz [not null, note: 'src=- || rule=DEFAULT now()']
+  finalizado_en timestamptz [note: 'src=- || rule=nulo si y solo si en_curso; >= iniciado_en']
+  filas_leidas bigint [not null, note: 'src=- || rule=CHECK >= 0']
+  filas_insertadas bigint [not null, note: 'src=- || rule=CHECK >= 0']
+  filas_actualizadas bigint [not null, note: 'src=- || rule=CHECK >= 0']
+  filas_omitidas bigint [not null, note: 'src=- || rule=repetidas o reemplazadas por version superior. CHECK >= 0']
+  filas_rechazadas bigint [not null, note: 'src=- || rule=CHECK >= 0; en estado ok: leidas = insertadas + actualizadas + omitidas + rechazadas (RN14)']
+  mensaje text [note: 'src=- || rule=detalle del error o nota']
+}
+
+Table control.registro_rechazado {
+  rechazo_id bigint [pk, increment, note: 'src=- || rule=surrogate']
+  lote_id bigint [not null, ref: > control.carga_lote.lote_id, note: 'src=- || rule=FK ON DELETE CASCADE (la cuarentena pertenece al lote)']
+  regla varchar(20) [not null, note: 'src=- || rule=codigo de la regla violada (RNxx, DQxx)']
+  motivo text [not null, note: 'src=- || rule=explicacion legible']
+  registro jsonb [not null, note: 'src=- || rule=fila de staging completa, sin modificar']
+  rechazado_en timestamptz [not null, note: 'src=- || rule=DEFAULT now()']
+}
+
+// ------------------------------------------------------------------ STAGING (todo text; Python solo aplana a CSV)
+Table staging.stg_listado_recursos {
+  code text [note: 'src=xm_ListadoRecursos.Code']
+  name text [note: 'src=xm_ListadoRecursos.Name']
+  type text [note: 'src=xm_ListadoRecursos.Type']
+  disp text [note: 'src=xm_ListadoRecursos.Disp']
+  rectype text [note: 'src=xm_ListadoRecursos.RecType']
+  companycode text [note: 'src=xm_ListadoRecursos.CompanyCode']
+  enersource text [note: 'src=xm_ListadoRecursos.EnerSource']
+  operstartdate text [note: 'src=xm_ListadoRecursos.OperStartdate']
+  state text [note: 'src=xm_ListadoRecursos.State']
+  archivo_origen text [note: 'src=- || rule=ruta del .json.gz de data/raw (linaje)']
+  fila_origen integer [note: 'src=- || rule=posicion en el archivo (desempate al deduplicar)']
+}
+
+Table staging.stg_agente {
+  code text [note: 'src=xm_ListadoAgentes.Code']
+  name text [note: 'src=xm_ListadoAgentes.Name']
+  activity text [note: 'src=xm_ListadoAgentes.Activity']
+  operstartdate text [note: 'src=xm_ListadoAgentes.OperStartdate']
+  state text [note: 'src=xm_ListadoAgentes.State']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_capacidad {
+  fecha text [note: 'src=xm_CapEfecNeta.Items.Date']
+  codigo text [note: 'src=xm_CapEfecNeta.DailyEntities.Code']
+  valor text [note: 'src=xm_CapEfecNeta.DailyEntities.Value']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_gen_diaria {
+  fecha text [note: 'src=simem_E17D25.Fecha']
+  codigoplanta text [note: 'src=simem_E17D25.CodigoPlanta']
+  tipogeneracion text [note: 'src=simem_E17D25.TipoGeneracion']
+  tipoclasificacion text [note: 'src=simem_E17D25.TipoClasificacion']
+  tipodespachorecurso text [note: 'src=simem_E17D25.TipoDespachoRecurso']
+  generacionrealestimada text [note: 'src=simem_E17D25.GeneracionRealEstimada']
+  generacionprogramadadespacho text [note: 'src=simem_E17D25.GeneracionProgramadaDespacho']
+  generacionprogramadaredespacho text [note: 'src=simem_E17D25.GeneracionProgramadaRedespacho']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_gen_horaria {
+  codigovariable text [note: 'src=simem_055A4D.CodigoVariable']
+  fechahora text [note: 'src=simem_055A4D.FechaHora']
+  codigoduracion text [note: 'src=simem_055A4D.CodigoDuracion']
+  unidadmedida text [note: 'src=simem_055A4D.UnidadMedida']
+  codigosicagente text [note: 'src=simem_055A4D.CodigoSICAgente']
+  codigoplanta text [note: 'src=simem_055A4D.CodigoPlanta']
+  version text [note: 'src=simem_055A4D.Version']
+  valor text [note: 'src=simem_055A4D.Valor']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_divipola_dpto {
+  codigo_departamento text [note: 'src=divipola_vcjz-niiq.codigo_departamento']
+  nombre_departamento text [note: 'src=divipola_vcjz-niiq.nombre_departamento']
+  longitud text [note: 'src=divipola_vcjz-niiq.longitud']
+  latitud text [note: 'src=divipola_vcjz-niiq.latitud']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_divipola_mpio {
+  cod_dpto text [note: 'src=divipola_gdxc-w37w.cod_dpto']
+  dpto text [note: 'src=divipola_gdxc-w37w.dpto']
+  cod_mpio text [note: 'src=divipola_gdxc-w37w.cod_mpio']
+  nom_mpio text [note: 'src=divipola_gdxc-w37w.nom_mpio']
+  tipo_municipio text [note: 'src=divipola_gdxc-w37w.tipo_municipio']
+  longitud text [note: 'src=divipola_gdxc-w37w.longitud']
+  latitud text [note: 'src=divipola_gdxc-w37w.latitud']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_estacion {
+  codigo text [note: 'src=socrata_hp9r-jxuu.codigo']
+  nombre text [note: 'src=socrata_hp9r-jxuu.nombre']
+  categoria text [note: 'src=socrata_hp9r-jxuu.categoria']
+  tecnologia text [note: 'src=socrata_hp9r-jxuu.tecnologia']
+  estado text [note: 'src=socrata_hp9r-jxuu.estado']
+  departamento text [note: 'src=socrata_hp9r-jxuu.departamento']
+  municipio text [note: 'src=socrata_hp9r-jxuu.municipio']
+  altitud text [note: 'src=socrata_hp9r-jxuu.altitud']
+  longitud text [note: 'src=socrata_hp9r-jxuu.longitud']
+  latitud text [note: 'src=socrata_hp9r-jxuu.latitud']
+  fecha_instalacion text [note: 'src=socrata_hp9r-jxuu.fecha_instalacion']
+  area_operativa text [note: 'src=socrata_hp9r-jxuu.area_operativa']
+  corriente text [note: 'src=socrata_hp9r-jxuu.corriente']
+  area_hidrografica text [note: 'src=socrata_hp9r-jxuu.area_hidrografica']
+  zona_hidrografica text [note: 'src=socrata_hp9r-jxuu.zona_hidrografica']
+  subzona_hidrografica text [note: 'src=socrata_hp9r-jxuu.subzona_hidrografica']
+  entidad text [note: 'src=socrata_hp9r-jxuu.entidad']
+  fecha_suspension text [note: 'src=socrata_hp9r-jxuu.fecha_suspension']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_observacion {
+  codigoestacion text [note: 'src=socrata_57sv-p2fu.codigoestacion']
+  codigosensor text [note: 'src=socrata_57sv-p2fu.codigosensor']
+  fechaobservacion text [note: 'src=socrata_57sv-p2fu.fechaobservacion']
+  valorobservado text [note: 'src=socrata_57sv-p2fu.valorobservado']
+  descripcionsensor text [note: 'src=socrata_57sv-p2fu.descripcionsensor']
+  unidadmedida text [note: 'src=socrata_57sv-p2fu.unidadmedida']
+  archivo_origen text
+  fila_origen integer
+}
+
+Table staging.stg_upme {
+  ano text [note: 'src=socrata_tq63-itzr.ano']
+  mes text [note: 'src=socrata_tq63-itzr.mes']
+  fuente text [note: 'src=socrata_tq63-itzr.fuente']
+  promedio_mensual_gwh text [note: 'src=socrata_tq63-itzr.promedio_mensual_gwh']
+  maximo_gwh text [note: 'src=socrata_tq63-itzr.maximo_gwh']
+  minimo_gwh text [note: 'src=socrata_tq63-itzr.minimo_gwh']
+  generacion_total_gwh text [note: 'src=socrata_tq63-itzr.generacion_total_gwh']
+  porcentaje_participacion text [note: 'src=socrata_tq63-itzr.porcentaje_participacion || rule=se carga a staging solo para conciliar con la vista (D09); no pasa al modelo']
+  archivo_origen text
+  fila_origen integer
+}

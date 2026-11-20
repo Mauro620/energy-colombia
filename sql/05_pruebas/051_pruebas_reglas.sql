@@ -63,6 +63,28 @@ SELECT pg_temp.probar('RN11', 'sensor con valor_max <= valor_min', '23514', $q$
 SELECT pg_temp.probar('RN14', 'lote ok con contadores que no cuadran', '23514', $q$
   INSERT INTO control.carga_lote (fuente, tabla_destino, estado, finalizado_en, filas_leidas, filas_insertadas) VALUES ('prueba', 'x', 'ok', now(), 10, 3) $q$);
 
+SELECT pg_temp.probar('RN07', 'departamento con latitud 40', '23514', $q$
+  INSERT INTO energia.departamento (codigo, nombre, latitud, longitud) VALUES ('99', 'PRUEBA', 40, -74) $q$);
+SELECT pg_temp.probar('RN07', 'municipio con longitud 10 (fuera de Colombia)', '23514', $q$
+  INSERT INTO energia.municipio (codigo, departamento_codigo, nombre, tipo, latitud, longitud) VALUES ('05999', '05', 'PRUEBA', 'Municipio', 6, 10) $q$);
+SELECT pg_temp.probar('RN07', 'estacion con altitud 7000 m', '23514', $q$
+  INSERT INTO energia.estacion (codigo, nombre, categoria_id, tecnologia_estacion_id, estado, municipio_codigo, entidad_id, latitud, longitud, altitud)
+  SELECT '9999999999', 'PRUEBA', categoria_id, tecnologia_estacion_id, estado, municipio_codigo, entidad_id, 4.6, -74.1, 7000 FROM energia.estacion ORDER BY estacion_id LIMIT 1 $q$);
+SELECT pg_temp.probar('RN05', 'codigo de agente de 2 caracteres', '23514', $q$
+  INSERT INTO energia.agente VALUES ('AB', 'PRUEBA', 'GENERACION', 'OPERACION', '2020-01-01') $q$);
+SELECT pg_temp.probar('RN05', 'codigo de version fuera de formato', '23514', $q$
+  INSERT INTO energia.version_liquidacion VALUES ('ZZ9', 99, 'PRUEBA') $q$);
+SELECT pg_temp.probar('RN16', 'codigo de municipio con letras', '23514', $q$
+  INSERT INTO energia.municipio (codigo, departamento_codigo, nombre, tipo) VALUES ('0A999', '05', 'PRUEBA', 'Municipio') $q$);
+SELECT pg_temp.probar('RN01', 'UPME con minimo mayor que el maximo', '23514', $q$
+  INSERT INTO energia.generacion_mensual_upme VALUES ('2030-01-01', (SELECT fuente_energetica_id FROM energia.fuente_energetica LIMIT 1), 1, 2, 5, 5, false) $q$);
+SELECT pg_temp.probar('RN11', 'sensor con valor_min pero sin valor_max', '23514', $q$
+  INSERT INTO energia.sensor (codigo, valor_min) VALUES ('9998', 1) $q$);
+SELECT pg_temp.probar('RN14', 'lote en_curso con fecha de fin', '23514', $q$
+  INSERT INTO control.carga_lote (fuente, tabla_destino, estado, finalizado_en) VALUES ('prueba', 'x', 'en_curso', now()) $q$);
+SELECT pg_temp.probar('RN14', 'lote cerrado antes de iniciar', '23514', $q$
+  INSERT INTO control.carga_lote (fuente, tabla_destino, estado, iniciado_en, finalizado_en) VALUES ('prueba', 'x', 'error', now(), now() - interval '1 day') $q$);
+
 \echo '=== EXCLUDE (23P01) y UNIQUE (23505)'
 SELECT pg_temp.probar('RN03', 'vigencia solapada para la misma planta', '23P01', $q$
   INSERT INTO energia.capacidad_planta (planta_id, vigencia, capacidad_kw)
@@ -86,6 +108,8 @@ SELECT pg_temp.probar('FK', 'generacion diaria de una planta inexistente', '2350
   INSERT INTO energia.generacion_diaria_planta VALUES (-1, '2030-01-01', 1, 1, 1) $q$);
 SELECT pg_temp.probar('FK', 'observacion de un sensor inexistente', '23503', $q$
   INSERT INTO energia.observacion VALUES ((SELECT estacion_id FROM energia.estacion ORDER BY 1 LIMIT 1), -1, '2030-01-01 05:00:00+00', 1) $q$);
+SELECT pg_temp.probar('FK', 'observacion de una estacion inexistente (H18)', '23503', $q$
+  INSERT INTO energia.observacion SELECT -1, sensor_id, '2030-01-01 05:00:00+00', 25 FROM energia.sensor WHERE codigo = '0068' $q$);
 SELECT pg_temp.probar('FK', 'generacion horaria con version inexistente', '23503', $q$
   INSERT INTO energia.generacion_horaria_planta VALUES ((SELECT planta_id FROM energia.planta ORDER BY 1 LIMIT 1), '2030-01-01 05:00:00+00', 1, 'TXZ') $q$);
 SELECT pg_temp.probar('FK', 'borrar una planta con generacion (ON DELETE RESTRICT)', '23503', $q$

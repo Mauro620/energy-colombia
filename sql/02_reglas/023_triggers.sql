@@ -1,7 +1,7 @@
 -- Triggers condicionales PL/pgSQL. Son la ultima defensa: la carga (sql/03_carga) filtra antes del INSERT.
 -- Todos levantan SQLSTATE P0001 (RAISE EXCEPTION por defecto).
 
--- RN09 (H02) Version de liquidacion: si llega una version de MENOR orden que la guardada se rechaza; si es igual o mayor, se actualiza.
+-- RN09 (H19) Version de liquidacion: si llega una version de MENOR orden que la guardada se rechaza; si es igual o mayor, se actualiza.
 -- Condicional: solo se dispara cuando el UPDATE cambia la version (WHEN). Cubre INSERT ... ON CONFLICT DO UPDATE.
 CREATE OR REPLACE FUNCTION energia.fn_generacion_horaria_version() RETURNS trigger
 LANGUAGE plpgsql AS $$

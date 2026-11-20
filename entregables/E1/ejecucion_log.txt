@@ -1,0 +1,982 @@
+# Entrega 1: ejecucion 2026-11-20T00:09:58-05:00
+ Container proyecto_final-db-1  Recreate
+ Container proyecto_final-db-1  Recreated
+ Container proyecto_final-db-1  Starting
+ Container proyecto_final-db-1  Started
+ Container proyecto_final-db-1  Waiting
+ Container proyecto_final-db-1  Healthy
+=== Recrear la base (parte de una base vacia)
+DROP DATABASE
+=== 00_setup/001_base.sql
+CREATE DATABASE
+You are now connected to database "energia_db" as user "postgres".
+REVOKE
+=== 00_setup/002_esquemas_extensiones.sql
+You are now connected to database "energia_db" as user "postgres".
+CREATE EXTENSION
+CREATE EXTENSION
+CREATE SCHEMA
+CREATE SCHEMA
+CREATE SCHEMA
+CREATE SCHEMA
+CREATE FUNCTION
+=== Aplanar data/raw a data/stage (Python solo extrae y aplana)
+listado_recursos: 2521 filas de 1 archivos, 0.0 s
+agente: 718 filas de 1 archivos, 0.0 s
+capacidad: 925228 filas de 23 archivos, 6.0 s
+gen_diaria: 330379 filas de 25 archivos, 3.2 s
+gen_horaria: 12785568 filas de 27 archivos, 110.9 s
+divipola_dpto: 33 filas de 1 archivos, 0.0 s
+divipola_mpio: 1122 filas de 1 archivos, 0.0 s
+estacion: 57706 filas de 1 archivos, 1.5 s
+observacion: 156981 filas de 1 archivos, 2.1 s
+upme: 2786 filas de 1 archivos, 0.0 s
+
+=== 01_ddl/011_tipos.sql
+DO
+--- 01_ddl/011_tipos.sql: 0 s
+
+=== 01_ddl/012_catalogos.sql
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+--- 01_ddl/012_catalogos.sql: 0 s
+
+=== 01_ddl/013_entidades.sql
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+--- 01_ddl/013_entidades.sql: 1 s
+
+=== 01_ddl/014_hechos.sql
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+--- 01_ddl/014_hechos.sql: 0 s
+
+=== 01_ddl/015_control.sql
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+--- 01_ddl/015_control.sql: 0 s
+
+=== 01_ddl/016_staging.sql
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+--- 01_ddl/016_staging.sql: 1 s
+
+=== 02_reglas/020_helper.sql
+CREATE PROCEDURE
+--- 02_reglas/020_helper.sql: 0 s
+
+=== 02_reglas/021_checks.sql
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+CALL
+--- 02_reglas/021_checks.sql: 0 s
+
+=== 02_reglas/022_exclude_unico_parcial.sql
+CALL
+CREATE INDEX
+--- 02_reglas/022_exclude_unico_parcial.sql: 1 s
+
+=== 02_reglas/023_triggers.sql
+CREATE FUNCTION
+psql:/sql/02_reglas/023_triggers.sql:21: NOTICE:  trigger "trg_generacion_horaria_version" for relation "energia.generacion_horaria_planta" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+psql:/sql/02_reglas/023_triggers.sql:45: NOTICE:  trigger "trg_generacion_horaria_capacidad" for relation "energia.generacion_horaria_planta" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+DROP TRIGGER
+psql:/sql/02_reglas/023_triggers.sql:68: NOTICE:  trigger "trg_observacion_rango" for relation "energia.observacion" does not exist, skipping
+CREATE TRIGGER
+--- 02_reglas/023_triggers.sql: 0 s
+
+=== 03_carga/030_utilidades.sql
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+--- 03_carga/030_utilidades.sql: 0 s
+
+=== 03_carga/031_semillas.sql
+INSERT 0 6
+--- 03_carga/031_semillas.sql: 0 s
+
+=== 03_carga/032_geografia.sql
+--- departamentos
+BEGIN
+TRUNCATE TABLE
+COPY 33
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- municipios
+BEGIN
+TRUNCATE TABLE
+COPY 1122
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/032_geografia.sql: 1 s
+
+=== 03_carga/033_agentes.sql
+BEGIN
+TRUNCATE TABLE
+COPY 718
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/033_agentes.sql: 1 s
+
+=== 03_carga/034_plantas.sql
+BEGIN
+TRUNCATE TABLE
+COPY 2521
+SELECT 2521
+INSERT 0 5
+INSERT 0 9
+INSERT 0 12
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/034_plantas.sql: 4 s
+
+=== 03_carga/035_upme.sql
+BEGIN
+TRUNCATE TABLE
+COPY 2786
+SELECT 2786
+INSERT 0 13
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/035_upme.sql: 1 s
+
+=== 03_carga/036_capacidad.sql
+BEGIN
+TRUNCATE TABLE
+COPY 925228
+SELECT 925228
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/036_capacidad.sql: 131 s
+
+=== 03_carga/037_gen_diaria.sql
+BEGIN
+TRUNCATE TABLE
+COPY 330379
+SELECT 330379
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/037_gen_diaria.sql: 66 s
+
+=== 03_carga/038_gen_horaria.sql
+BEGIN
+SET
+TRUNCATE TABLE
+COPY 12785568
+SELECT 12785568
+SELECT 2711448
+SELECT 15662
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/038_gen_horaria.sql: 382 s
+
+=== 03_carga/039_estaciones.sql
+BEGIN
+TRUNCATE TABLE
+COPY 57706
+SELECT 57706
+SELECT 8897
+INSERT 0 13
+INSERT 0 4
+INSERT 0 77
+INSERT 0 38
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/039_estaciones.sql: 85 s
+
+=== 03_carga/040_observaciones.sql
+BEGIN
+SET
+TRUNCATE TABLE
+COPY 156981
+INSERT 0 7
+CREATE TABLE
+INSERT 0 17
+INSERT 0 18
+SELECT 156981
+ cerrar_lote 
+-------------
+ 
+(1 row)
+
+COMMIT
+--- 03_carga/040_observaciones.sql: 10 s
+
+=== 04_consultas/041_vistas.sql
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+CREATE VIEW
+--- 04_consultas/041_vistas.sql: 0 s
+
+=== 04_consultas/042_consultas.sql
+Null display is "(nulo)".
+=== GROUP BY + HAVING
+Q01 Que tecnologias generaron mas de 5 000 GWh reales entre 2025-01 y 2026-10 y con cuantas plantas?
+ tecnologia | plantas | real_gwh 
+------------+---------+----------
+ HIDRAULICA |     160 | 119657.4
+ TERMICA    |      76 |  26512.5
+ SOLAR      |     396 |   9806.0
+(3 rows)
+
+Q02 Que operadores (agentes) con 3 o mas plantas generaron mas de 500 GWh?
+ codigo_sic |                             nombre                              | plantas | real_gwh 
+------------+-----------------------------------------------------------------+---------+----------
+ EPMG       | EMPRESAS PUBLICAS DE MEDELLIN E.S.P.                            |      43 |  43047.0
+ ENDG       | ENEL COLOMBIA SA ESP                                            |      31 |  31280.3
+ ISGG       | ISAGEN S.A. E.S.P.                                              |      17 |  27860.6
+ EPSG       | CELSIA COLOMBIA S.A. E.S.P.                                     |      73 |   9346.7
+ CHVG       | AES COLOMBIA & CIA. S.C.A. E.S.P.                               |       3 |   7408.4
+ TBSG       | TERMOBARRANQUILLA S.A. EMPRESA DE SERVICIOS PUBLICOS            |       3 |   5799.4
+ GECG       | GENERADORA Y COMERCIALIZADORA DE ENERGIA DEL CARIBE S.A. E.S.P. |      10 |   4908.5
+ EMUG       | EMPRESA URRA S.A. E.S.P.                                        |       4 |   2797.8
+ TYPG       | TERMOYOPAL GENERACION 2 S.A.S E.S.P.                            |      14 |   2517.6
+ SOCG       | COMPAÑÍA ELÉCTRICA DE SOCHAGOTA  S.A.S. E.S.P.                  |       8 |   1526.9
+(10 rows)
+
+Q03 Que estaciones y sensores tienen menos del 80 % de los instantes que reporta el resto de la red? (referencia = instantes distintos del sensor)
+  estacion  | sensor | instantes | esperados | completitud_pct 
+------------+--------+-----------+-----------+-----------------
+ 0027037010 | 0232   |         1 |       328 |             0.3
+ 0026127010 | 0230   |         1 |       296 |             0.3
+ 0023147020 | 0230   |         1 |       296 |             0.3
+ 0027037010 | 0231   |         1 |       323 |             0.3
+ 0021037020 | 0232   |         1 |       328 |             0.3
+ 0015015100 | 0069   |         1 |       289 |             0.3
+ 0021037020 | 0230   |         1 |       296 |             0.3
+ 0021037020 | 0231   |         1 |       323 |             0.3
+ 0027037010 | 0230   |         1 |       296 |             0.3
+ 0042077020 | 0231   |         2 |       323 |             0.6
+(10 rows)
+
+=== FUNCIONES DE VENTANA
+Q04 Cual es el ranking mensual de plantas dentro de cada tecnologia por energia real? (RANK, top 3 de julio de 2026)
+ tecnologia  | planta |    mes     | real_gwh | posicion 
+-------------+--------+------------+----------+----------
+ COGENERADOR | INC1   | 2026-07-01 |    19.65 |        1
+ COGENERADOR | CGM1   | 2026-07-01 |    16.02 |        2
+ COGENERADOR | CIP1   | 2026-07-01 |    12.86 |        3
+ EOLICA      | 3EE4   | 2026-07-01 |    11.96 |        1
+ EOLICA      | 3EXH   | 2026-07-01 |     7.61 |        2
+ EOLICA      | 4UK6   | 2026-07-01 |     1.69 |        3
+ HIDRAULICA  | GVIO   | 2026-07-01 |   845.03 |        1
+ HIDRAULICA  | CHVR   | 2026-07-01 |   680.24 |        2
+ HIDRAULICA  | PES1   | 2026-07-01 |   478.88 |        3
+ SOLAR       | GYPO   | 2026-07-01 |    69.53 |        1
+ SOLAR       | PORO   | 2026-07-01 |    58.23 |        2
+ SOLAR       | GYP3   | 2026-07-01 |    43.36 |        3
+ TERMICA     | TBST   | 2026-07-01 |   356.00 |        1
+ TERMICA     | TCDT   | 2026-07-01 |   344.11 |        2
+ TERMICA     | TSJ1   | 2026-07-01 |   120.70 |        3
+(15 rows)
+
+Q05 Cuanto vario cada mes la generacion de las 5 plantas mas grandes frente al mes anterior? (LAG)
+ codigo |    mes     |  gwh   | gwh_mes_anterior | variacion_pct 
+--------+------------+--------+------------------+---------------
+ CHVR   | 2026-10-01 | 234.64 |           479.72 |         -51.1
+ CHVR   | 2026-09-01 | 479.72 |           532.59 |          -9.9
+ CHVR   | 2026-08-01 | 532.59 |           680.24 |         -21.7
+ CHVR   | 2026-07-01 | 680.24 |           484.46 |          40.4
+ CHVR   | 2026-06-01 | 484.46 |           396.88 |          22.1
+ CHVR   | 2026-05-01 | 396.88 |           262.99 |          50.9
+ CHVR   | 2026-04-01 | 262.99 |           236.96 |          11.0
+ CHVR   | 2026-03-01 | 236.96 |            96.45 |         145.7
+ CHVR   | 2026-02-01 |  96.45 |           192.86 |         -50.0
+ CHVR   | 2026-01-01 | 192.86 |           263.89 |         -26.9
+(10 rows)
+
+Q06 Cual es el promedio movil de 7 dias de la planta de mayor generacion? (AVG OVER ROWS 6 PRECEDING, ultimos 5 dias)
+ codigo |   fecha    | real_estimada_kwh | promedio_movil_7d 
+--------+------------+-------------------+-------------------
+ PES1   | 2026-10-31 |     21620440.0000 |          21709407
+ PES1   | 2026-10-30 |     21723460.0000 |          21665513
+ PES1   | 2026-10-29 |     21773460.0000 |          21650237
+ PES1   | 2026-10-28 |     21696950.0000 |          21628034
+ PES1   | 2026-10-27 |     21682560.0000 |          21616940
+(5 rows)
+
+Q07 Que plantas con 1 GWh/dia o mas cayeron mas de 50 % frente a su promedio de los 30 dias anteriores? (ventana 30 PRECEDING..1 PRECEDING)
+ codigo |   nombre   |   fecha    | real_estimada_kwh | promedio_30d 
+--------+------------+------------+-------------------+--------------
+ GVIO   | GUAVIO     | 2026-10-31 |        89860.0000 |     12682714
+ PRC3   | PORCE III  | 2026-10-31 |      1223200.0000 |      5789581
+ PRC2   | PORCE II   | 2026-10-31 |        17430.0000 |      3084002
+ SNCR   | SAN CARLOS | 2026-10-30 |       159550.0000 |     12385727
+ PRC3   | PORCE III  | 2026-10-30 |            0.0000 |      5823308
+ SNCR   | SAN CARLOS | 2026-10-29 |      1734730.0000 |     13021406
+ PRC3   | PORCE III  | 2026-10-29 |       125510.0000 |      5890573
+ TSJ1   | TASAJERO 1 | 2026-10-29 |      1660220.0000 |      3932301
+ PLYS   | PLAYAS     | 2026-10-29 |       480110.0000 |      2910319
+ GVIO   | GUAVIO     | 2026-10-28 |      6192610.0000 |     14736584
+(10 rows)
+
+Q08 Cuantas plantas concentran el 80 % de la generacion de todo el periodo? (participacion acumulada SUM OVER)
+ plantas_con_generacion | plantas_para_el_80_pct | acumulado_pct 
+------------------------+------------------------+---------------
+                    647 |                     30 |          80.0
+(1 row)
+
+=== JOINS
+Q09 INNER: generacion del ultimo dia con planta, tecnologia, operador y capacidad vigente (hecho + 4 dimensiones)
+   fecha    | codigo | tecnologia |                       operador                       | real_estimada_kwh | capacidad_kw 
+------------+--------+------------+------------------------------------------------------+-------------------+--------------
+ 2026-10-31 | PES1   | HIDRAULICA | EMPRESAS PUBLICAS DE MEDELLIN E.S.P.                 |     21620440.0000 |  1200000.000
+ 2026-10-31 | TBST   | TERMICA    | TERMOBARRANQUILLA S.A. EMPRESA DE SERVICIOS PUBLICOS |     18815000.0000 |   791000.000
+ 2026-10-31 | SOG1   | HIDRAULICA | ISAGEN S.A. E.S.P.                                   |     18284910.0000 |   819000.000
+ 2026-10-31 | TCDT   | TERMICA    | TERMOCANDELARIA S.A.S. - E.S.P.                      |     13305770.0000 |   555000.000
+ 2026-10-31 | SNCR   | HIDRAULICA | ISAGEN S.A. E.S.P.                                   |     12878290.0000 |  1240000.000
+(5 rows)
+
+Q10 LEFT: que porcentaje de las estaciones del catalogo cruza con DIVIPOLA por nombre normalizado? (S-07)
+ estaciones | con_cruce | cruce_pct 
+------------+-----------+-----------
+       9935 |      8892 |      89.5
+(1 row)
+
+Q11 ANTI-JOIN: que plantas no tienen capacidad vigente al 2026-10-31, y cuales no tienen generacion diaria?
+         caso          | plantas 
+-----------------------+---------
+ sin capacidad vigente |     235
+ sin generacion diaria |    1871
+(2 rows)
+
+Q12 FULL OUTER: que meses tiene XM, cuales UPME, y cuales solo uno de los dos? (cobertura)
+    mes     | en_xm | en_upme 
+------------+-------+---------
+ 2026-09-01 | t     | f
+ 2026-10-01 | t     | f
+(2 rows)
+
+Q13 LATERAL: cuales son las 3 horas pico de cada una de las 5 plantas solares con mas energia horaria?
+ codigo |    hora_colombia    | energia_kwh | version_codigo 
+--------+---------------------+-------------+----------------
+ 4YCF   | 2026-09-23 11:00:00 | 161899.2600 | TXF
+ 4YCF   | 2026-09-23 12:00:00 | 160600.9300 | TXF
+ 4YCF   | 2026-10-23 12:00:00 | 160309.2000 | TXF
+ ATLP   | 2026-10-14 11:00:00 | 198616.5100 | TXF
+ ATLP   | 2026-10-31 11:00:00 | 198333.2900 | TXF
+ ATLP   | 2026-10-14 10:00:00 | 198003.8600 | TXF
+ GYP3   | 2026-10-15 12:00:00 | 199796.1300 | TXF
+ GYP3   | 2026-08-12 10:00:00 | 199787.6300 | TX3
+ GYP3   | 2026-08-24 11:00:00 | 199785.1200 | TX3
+ GYPO   | 2026-10-04 11:00:00 | 362361.0600 | TXF
+ GYPO   | 2026-05-01 10:00:00 | 355875.0300 | TX3
+ GYPO   | 2026-05-01 11:00:00 | 354734.9200 | TX3
+ PORO   | 2026-10-17 13:00:00 | 302497.7300 | TXF
+ PORO   | 2026-08-31 11:00:00 | 301064.2100 | TX3
+ PORO   | 2026-09-23 11:00:00 | 300915.9800 | TXF
+(15 rows)
+
+Q14 JOIN POR TIEMPO: precipitacion diaria vs generacion hidraulica diaria (D14: se relacionan solo por dia, nunca por ubicacion)
+    Hoy devuelve 0 filas: las observaciones cubren 1 dia (2026-11-19) y la generacion diaria llega a 2026-10-31. Crece con el workflow de Actions.
+ fecha | hidraulica_gwh | precipitacion_mm 
+-------+----------------+------------------
+(0 rows)
+
+   dato    |    generacion_diaria    |      observaciones      
+-----------+-------------------------+-------------------------
+ cobertura | 2025-01-01 a 2026-10-31 | 2026-11-19 a 2026-11-19
+(1 row)
+
+=== VISTAS
+V1 participacion UPME, ultimo mes (parcial)
+  periodo   |  fuente   | generacion_total_gwh | parcial | participacion_pct 
+------------+-----------+----------------------+---------+-------------------
+ 2026-08-01 | AGUA      |          1506.024628 | t       |         61.332979
+ 2026-08-01 | GAS       |           363.060571 | t       |         14.785672
+ 2026-08-01 | CARBON    |           296.552480 | t       |         12.077124
+ 2026-08-01 | RAD SOLAR |           215.722193 | t       |          8.785304
+ 2026-08-01 | BAGAZO    |            26.605765 | t       |          1.083522
+(5 rows)
+
+V4 conciliacion XM vs UPME, julio de 2026
+  periodo   |   fuente    |  xm_gwh  |  upme_gwh   | diferencia_gwh | diferencia_pct | upme_parcial 
+------------+-------------+----------+-------------+----------------+----------------+--------------
+ 2026-07-01 | AGUA        | 5066.119 | 5059.710044 |          6.409 |           0.13 | f
+ 2026-07-01 | GAS         |  931.706 |  933.931534 |         -2.226 |          -0.24 | f
+ 2026-07-01 | CARBON      |  889.943 |  892.042707 |         -2.100 |          -0.24 | f
+ 2026-07-01 | RAD SOLAR   |  597.309 |  626.912497 |        -29.604 |          -4.72 | f
+ 2026-07-01 | BAGAZO      |   71.586 |   81.731547 |        -10.145 |         -12.41 | f
+ 2026-07-01 | COMBUSTOLEO |   55.699 |   55.101772 |          0.598 |           1.08 | f
+ 2026-07-01 | VIENTO      |   21.251 |   20.673081 |          0.577 |           2.79 | f
+ 2026-07-01 | BIOMASA     |   12.616 |   12.661570 |         -0.046 |          -0.36 | f
+ 2026-07-01 | ACPM        |   10.261 |   10.231457 |          0.030 |           0.29 | f
+ 2026-07-01 | BIOGAS      |    1.289 |    2.072753 |         -0.783 |         -37.79 | f
+ 2026-07-01 | GLP         |    0.000 |      (nulo) |         (nulo) |         (nulo) | f
+ 2026-07-01 | JET-A1      |    0.000 |      (nulo) |         (nulo) |         (nulo) | f
+(12 rows)
+
+--- 04_consultas/042_consultas.sql: 5 s
+
+=== 05_pruebas/051_pruebas_reglas.sql
+Null display is "(nulo)".
+CREATE TABLE
+CREATE FUNCTION
+=== CHECK (23514)
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:27: NOTICE:  RN01 | energia horaria negativa | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:29: NOTICE:  RN01 | energia diaria real negativa | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:31: NOTICE:  RN01 | UPME total negativo | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:33: NOTICE:  RN02 | capacidad cero | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:35: NOTICE:  RN02 | vigencia vacia | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:37: NOTICE:  RN04 | hora no exacta (05:30) | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:40: NOTICE:  RN05 | codigo de planta de 2 caracteres | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:43: NOTICE:  RN05 | codigo de planta en minuscula | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:46: NOTICE:  RN05 | codigo de estacion de 5 digitos | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:48: NOTICE:  RN05 | codigo de sensor con letras | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:50: NOTICE:  RN06 | periodo UPME con dia 15 | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:53: NOTICE:  RN07 | estacion con latitud 40 (fuera de Colombia) | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:55: NOTICE:  RN08 | municipio cuyo prefijo no es su departamento | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:57: NOTICE:  RN16 | departamento con codigo no numerico | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:60: NOTICE:  RN12 | suspension anterior a la instalacion | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:62: NOTICE:  RN11 | sensor con valor_max <= valor_min | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:64: NOTICE:  RN14 | lote ok con contadores que no cuadran | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:67: NOTICE:  RN07 | departamento con latitud 40 | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:69: NOTICE:  RN07 | municipio con longitud 10 (fuera de Colombia) | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:72: NOTICE:  RN07 | estacion con altitud 7000 m | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:74: NOTICE:  RN05 | codigo de agente de 2 caracteres | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:76: NOTICE:  RN05 | codigo de version fuera de formato | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:78: NOTICE:  RN16 | codigo de municipio con letras | esperado 23514 obtenido 23514 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:80: NOTICE:  RN01 | UPME con minimo mayor que el maximo | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:82: NOTICE:  RN11 | sensor con valor_min pero sin valor_max | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:84: NOTICE:  RN14 | lote en_curso con fecha de fin | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:86: NOTICE:  RN14 | lote cerrado antes de iniciar | esperado 23514 obtenido 23514 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+=== EXCLUDE (23P01) y UNIQUE (23505)
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:91: NOTICE:  RN03 | vigencia solapada para la misma planta | esperado 23P01 obtenido 23P01 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:94: NOTICE:  RN03 | vigencia contigua (no solapada) entra | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:97: NOTICE:  UQ | codigo de planta repetido | esperado 23505 obtenido 23505 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:99: NOTICE:  PK | misma (planta, hora) dos veces | esperado 23505 obtenido 23505 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:104: NOTICE:  RN13 | dos lotes en_curso de la misma fuente | esperado 23505 obtenido 23505 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+=== FK (23503), NOT NULL (23502) y ENUM (22P02)
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:108: NOTICE:  FK | generacion diaria de una planta inexistente | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:110: NOTICE:  FK | observacion de un sensor inexistente | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:112: NOTICE:  FK | observacion de una estacion inexistente (H18) | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:114: NOTICE:  FK | generacion horaria con version inexistente | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:116: NOTICE:  FK | borrar una planta con generacion (ON DELETE RESTRICT) | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:118: NOTICE:  FK | borrar un departamento con municipios (RESTRICT) | esperado 23503 obtenido 23503 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:127: NOTICE:  FK | borrar una planta sin hechos borra su capacidad (ON DELETE CASCADE) | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:130: NOTICE:  NN | planta sin nombre | esperado 23502 obtenido 23502 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:133: NOTICE:  RN15 | estado de planta fuera del ENUM | esperado 22P02 obtenido 22P02 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+=== Triggers (P0001): RN09 version, RN10 capacidad, RN11 sensor
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:138: NOTICE:  RN09 | version de menor orden que la guardada (TXF -> TX1) | esperado P0001 obtenido P0001 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:141: NOTICE:  RN09 | version de mayor orden reemplaza (TXF -> TX4) | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:144: NOTICE:  RN09 | misma version, solo cambia la energia | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:148: NOTICE:  RN09 | upsert con version inferior (ON CONFLICT DO UPDATE) | esperado P0001 obtenido P0001 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:151: NOTICE:  RN10 | energia mayor que capacidad x 1.10 | esperado P0001 obtenido P0001 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:154: NOTICE:  RN10 | energia igual a la capacidad entra | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:158: NOTICE:  RN10 | sin capacidad vigente el trigger no aplica | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:160: NOTICE:  RN11 | temperatura fuera del rango del sensor (60 C) | esperado P0001 obtenido P0001 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:162: NOTICE:  RN11 | centinela -9998 no entra como valor | esperado P0001 obtenido P0001 -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:164: NOTICE:  RN11 | centinela propio del sensor (995 en temperatura) | esperado P0001 obtenido P0001 -> PASS
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:166: NOTICE:  RN11 | temperatura valida (25.5 C) | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+=== Pruebas positivas de insercion valida
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:171: NOTICE:  OK | estacion valida dentro de Colombia | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:173: NOTICE:  OK | generacion diaria valida | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+psql:/sql/05_pruebas/051_pruebas_reglas.sql:175: NOTICE:  OK | periodo UPME dia 1 | esperado OK obtenido OK -> PASS
+ probar 
+--------
+ 
+(1 row)
+
+=== RESUMEN
+ n  | regla |                                caso                                 | esperado | obtenido | resultado 
+----+-------+---------------------------------------------------------------------+----------+----------+-----------
+  1 | RN01  | energia horaria negativa                                            | 23514    | 23514    | PASS
+  2 | RN01  | energia diaria real negativa                                        | 23514    | 23514    | PASS
+  3 | RN01  | UPME total negativo                                                 | 23514    | 23514    | PASS
+  4 | RN02  | capacidad cero                                                      | 23514    | 23514    | PASS
+  5 | RN02  | vigencia vacia                                                      | 23514    | 23514    | PASS
+  6 | RN04  | hora no exacta (05:30)                                              | 23514    | 23514    | PASS
+  7 | RN05  | codigo de planta de 2 caracteres                                    | 23514    | 23514    | PASS
+  8 | RN05  | codigo de planta en minuscula                                       | 23514    | 23514    | PASS
+  9 | RN05  | codigo de estacion de 5 digitos                                     | 23514    | 23514    | PASS
+ 10 | RN05  | codigo de sensor con letras                                         | 23514    | 23514    | PASS
+ 11 | RN06  | periodo UPME con dia 15                                             | 23514    | 23514    | PASS
+ 12 | RN07  | estacion con latitud 40 (fuera de Colombia)                         | 23514    | 23514    | PASS
+ 13 | RN08  | municipio cuyo prefijo no es su departamento                        | 23514    | 23514    | PASS
+ 14 | RN16  | departamento con codigo no numerico                                 | 23514    | 23514    | PASS
+ 15 | RN12  | suspension anterior a la instalacion                                | 23514    | 23514    | PASS
+ 16 | RN11  | sensor con valor_max <= valor_min                                   | 23514    | 23514    | PASS
+ 17 | RN14  | lote ok con contadores que no cuadran                               | 23514    | 23514    | PASS
+ 18 | RN07  | departamento con latitud 40                                         | 23514    | 23514    | PASS
+ 19 | RN07  | municipio con longitud 10 (fuera de Colombia)                       | 23514    | 23514    | PASS
+ 20 | RN07  | estacion con altitud 7000 m                                         | 23514    | 23514    | PASS
+ 21 | RN05  | codigo de agente de 2 caracteres                                    | 23514    | 23514    | PASS
+ 22 | RN05  | codigo de version fuera de formato                                  | 23514    | 23514    | PASS
+ 23 | RN16  | codigo de municipio con letras                                      | 23514    | 23514    | PASS
+ 24 | RN01  | UPME con minimo mayor que el maximo                                 | 23514    | 23514    | PASS
+ 25 | RN11  | sensor con valor_min pero sin valor_max                             | 23514    | 23514    | PASS
+ 26 | RN14  | lote en_curso con fecha de fin                                      | 23514    | 23514    | PASS
+ 27 | RN14  | lote cerrado antes de iniciar                                       | 23514    | 23514    | PASS
+ 28 | RN03  | vigencia solapada para la misma planta                              | 23P01    | 23P01    | PASS
+ 29 | RN03  | vigencia contigua (no solapada) entra                               | OK       | OK       | PASS
+ 30 | UQ    | codigo de planta repetido                                           | 23505    | 23505    | PASS
+ 31 | PK    | misma (planta, hora) dos veces                                      | 23505    | 23505    | PASS
+ 32 | RN13  | dos lotes en_curso de la misma fuente                               | 23505    | 23505    | PASS
+ 33 | FK    | generacion diaria de una planta inexistente                         | 23503    | 23503    | PASS
+ 34 | FK    | observacion de un sensor inexistente                                | 23503    | 23503    | PASS
+ 35 | FK    | observacion de una estacion inexistente (H18)                       | 23503    | 23503    | PASS
+ 36 | FK    | generacion horaria con version inexistente                          | 23503    | 23503    | PASS
+ 37 | FK    | borrar una planta con generacion (ON DELETE RESTRICT)               | 23503    | 23503    | PASS
+ 38 | FK    | borrar un departamento con municipios (RESTRICT)                    | 23503    | 23503    | PASS
+ 39 | FK    | borrar una planta sin hechos borra su capacidad (ON DELETE CASCADE) | OK       | OK       | PASS
+ 40 | NN    | planta sin nombre                                                   | 23502    | 23502    | PASS
+ 41 | RN15  | estado de planta fuera del ENUM                                     | 22P02    | 22P02    | PASS
+ 42 | RN09  | version de menor orden que la guardada (TXF -> TX1)                 | P0001    | P0001    | PASS
+ 43 | RN09  | version de mayor orden reemplaza (TXF -> TX4)                       | OK       | OK       | PASS
+ 44 | RN09  | misma version, solo cambia la energia                               | OK       | OK       | PASS
+ 45 | RN09  | upsert con version inferior (ON CONFLICT DO UPDATE)                 | P0001    | P0001    | PASS
+ 46 | RN10  | energia mayor que capacidad x 1.10                                  | P0001    | P0001    | PASS
+ 47 | RN10  | energia igual a la capacidad entra                                  | OK       | OK       | PASS
+ 48 | RN10  | sin capacidad vigente el trigger no aplica                          | OK       | OK       | PASS
+ 49 | RN11  | temperatura fuera del rango del sensor (60 C)                       | P0001    | P0001    | PASS
+ 50 | RN11  | centinela -9998 no entra como valor                                 | P0001    | P0001    | PASS
+ 51 | RN11  | centinela propio del sensor (995 en temperatura)                    | P0001    | P0001    | PASS
+ 52 | RN11  | temperatura valida (25.5 C)                                         | OK       | OK       | PASS
+ 53 | OK    | estacion valida dentro de Colombia                                  | OK       | OK       | PASS
+ 54 | OK    | generacion diaria valida                                            | OK       | OK       | PASS
+ 55 | OK    | periodo UPME dia 1                                                  | OK       | OK       | PASS
+(55 rows)
+
+ casos | pass | fail 
+-------+------+------
+    55 |   55 |    0
+(1 row)
+
+--- 05_pruebas/051_pruebas_reglas.sql: 0 s
+
+=== 05_pruebas/052_pruebas_calidad.sql
+Null display is "(nulo)".
+=== Q1 Conteos por lote: leidas = insertadas + actualizadas + omitidas + rechazadas, y leidas = filas en staging
+ lote_id |       fuente        |  leidas  |   ins   | act |  omit   |  rech  | staging  | resultado 
+---------+---------------------+----------+---------+-----+---------+--------+----------+-----------
+       1 | divipola_vcjz-niiq  |       33 |      33 |   0 |       0 |      0 |       33 | PASS
+       2 | divipola_gdxc-w37w  |     1122 |    1122 |   0 |       0 |      0 |     1122 | PASS
+       3 | xm_ListadoAgentes   |      718 |     713 |   0 |       5 |      0 |      718 | PASS
+       4 | xm_ListadoRecursos  |     2521 |    2518 |   0 |       3 |      0 |     2521 | PASS
+       5 | socrata_tq63-itzr   |     2786 |    2786 |   0 |       0 |      0 |     2786 | PASS
+       6 | xm_CapEfecNeta      |   925228 |  921213 |   0 |       0 |   4015 |   925228 | PASS
+       7 | simem_E17D25        |   330379 |  323995 |   0 |     749 |   5635 |   330379 | PASS
+       8 | simem_055A4D        | 12785568 | 2695786 |   0 | 9856680 | 233102 | 12785568 | PASS
+       9 | socrata_hp9r-jxuu   |    57706 |    8897 |   0 |   42639 |   6170 |    57706 | PASS
+      10 | ideam_observaciones |   156981 |   93667 |   0 |       0 |  63314 |   156981 | PASS
+(10 rows)
+
+=== Q2 Rechazos por regla en el ultimo lote de cada fuente
+       fuente        | regla | filas  |                                      motivo                                      
+---------------------+-------+--------+----------------------------------------------------------------------------------
+ ideam_observaciones | DQ15  |  61735 | estacion que no existe en el catalogo cargado (sin cruce DIVIPOLA o inexistente)
+ ideam_observaciones | DQ09  |   1186 | valor fuera del rango plausible del sensor
+ ideam_observaciones | DQ08  |    393 | centinela de dato faltante (no se carga como valor)
+ simem_055A4D        | RN17  | 217440 | planta que no esta en el listado de recursos
+ simem_055A4D        | RN10  |  15662 | 1020.9 kWh superan la capacidad vigente 820.000 kW x 1.10
+ simem_E17D25        | RN05  |   3617 | fila de generacion diaria invalida
+ simem_E17D25        | RN17  |   2018 | planta que no esta en el listado de recursos
+ socrata_hp9r-jxuu   | DQ14  |   6146 | departamento y municipio no cruzan con DIVIPOLA por nombre normalizado
+ socrata_hp9r-jxuu   | RN12  |     24 | estacion invalida
+ xm_CapEfecNeta      | RN17  |   4015 | recurso con capacidad que no esta en el listado de recursos
+(10 rows)
+
+=== Q3 Duplicados por clave de negocio y huerfanas (deben ser 0)
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  planta: codigo repetido | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  estacion: codigo repetido | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  agente: codigo repetido | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  generacion diaria: (planta, fecha) repetida | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  generacion horaria: (planta, hora) repetida | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  observacion: (estacion, sensor, instante) repetida | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  UPME: (periodo, fuente) repetida | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  huerfanas: observacion sin estacion | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  huerfanas: generacion horaria sin planta | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  huerfanas: capacidad sin planta | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  huerfanas: estacion sin municipio | esperado 0 obtenido 0 -> PASS
+psql:/sql/05_pruebas/052_pruebas_calidad.sql:50: NOTICE:  vigencias de capacidad solapadas | esperado 0 obtenido 0 -> PASS
+DO
+=== Q4 (reporte) Cruce DIVIPOLA de las estaciones del catalogo y su efecto en las observaciones (S-07)
+ estaciones | con_cruce | cruce_pct | estaciones_cargadas 
+------------+-----------+-----------+---------------------
+       9935 |      8892 |      89.5 |                8897
+(1 row)
+
+ observaciones_en_staging | rechazadas_por_estacion_sin_cruce | pct_perdido 
+--------------------------+-----------------------------------+-------------
+                   156981 |                             61735 |        39.3
+(1 row)
+
+=== Q5 (reporte) Total diario E17D25 vs suma horaria de 055A4D, por mes (dias en los dos periodos; kWh)
+    mes     | dias | diaria_gwh | horaria_gwh | diferencia_pct 
+------------+------+------------+-------------+----------------
+ 2026-05-01 |   31 |     7607.6 |      7644.5 |           0.49
+ 2026-06-01 |   30 |     7201.1 |      7277.4 |           1.06
+ 2026-07-01 |   31 |     7657.8 |      7675.7 |           0.23
+ 2026-08-01 |   31 |     7720.3 |      7739.1 |           0.24
+ 2026-09-01 |   30 |     7496.0 |      7551.6 |           0.74
+ 2026-10-01 |   31 |     7447.2 |      7507.7 |           0.81
+(6 rows)
+
+--- 05_pruebas/052_pruebas_calidad.sql: 8 s
+
+# Fin: 2026-11-20T00:23:50-05:00
