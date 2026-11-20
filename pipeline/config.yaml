@@ -1,0 +1,14 @@
+# Fuentes Socrata. Que es cada ID lo descubre pipeline/extract/socrata_metadata.py.
+domain: www.datos.gov.co
+sample_rows: 5000   # filas por dataset en data/raw/<id>/sample.json
+csv_rows: 200       # filas en data/sample/<id>.csv (versionable)
+
+sources:
+  - id: vtmi-tusj
+  - id: 8gum-9k6v
+  - id: tq63-itzr
+  - id: hp9r-jxuu
+  - id: 57sv-p2fu
+    # Opcionales por fuente:
+    #   sample_rows: 2000
+    #   where: "fechaobservacion >= '2024-01-01T00:00:00'"

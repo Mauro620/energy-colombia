@@ -1,0 +1,193 @@
+// PROPUESTA de modelo ER (PostgreSQL). Borrador para discutir en E1, no es DDL final.
+// Fuente de cada columna: docs/fuentes/<id>.md y docs/fuentes/hallazgos.md.
+// Visualizar: pegar en https://dbdiagram.io/d
+//
+// Convenciones: snake_case; claves surrogate `id` en dimensiones; claves naturales compuestas en hechos;
+// energia en numeric (nunca float); fechas con zona en timestamptz y almacenadas en UTC.
+
+Project energia_db {
+  database_type: 'PostgreSQL'
+  Note: '''
+    Sistema energetico colombiano. Bloques:
+    A) Geografia y catalogos compartidos  B) IDEAM (estaciones y observaciones)
+    C) UPME (generacion mensual por fuente)  D) XM (plantas y generacion) PENDIENTE de SIMEM  E) Ingesta
+  '''
+}
+
+// ---------------------------------------------------------------- A) Geografia
+// Ninguna fuente trae codigos DANE (hallazgos P15): se cruza por nombre. Si se incorpora DIVIPOLA (F08),
+// agregar `codigo_dane` unico a ambas tablas.
+Table departamento {
+  id smallint [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'IDEAM: departamento (33 distintos en la muestra del catalogo)']
+}
+
+Table municipio {
+  id integer [pk, increment]
+  departamento_id smallint [not null, ref: > departamento.id]
+  nombre varchar(80) [not null]
+
+  indexes {
+    (departamento_id, nombre) [unique, note: 'el mismo nombre de municipio existe en varios departamentos']
+  }
+}
+
+Table entidad {
+  id integer [pk, increment]
+  nombre varchar(200) [not null, unique, note: 'IDEAM: entidad propietaria de la estacion (73 distintas en la muestra)']
+}
+
+// ---------------------------------------------------------------- B) IDEAM
+Enum estado_estacion {
+  activa
+  suspendida
+  en_mantenimiento
+}
+
+Table categoria_estacion {
+  id smallint [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'catalogo.categoria (14 valores: Limnigrafica, Agrometeorologica, ...)']
+}
+
+Table tecnologia_estacion {
+  id smallint [pk, increment]
+  nombre varchar(60) [not null, unique, note: 'catalogo.tecnologia (4 valores). NO es tecnologia de generacion']
+}
+
+Table zona_hidrografica {
+  id smallint [pk, increment]
+  area_hidrografica varchar(60) [not null, note: 'catalogo.area_hidrografica (5 valores)']
+  nombre varchar(80) [not null, note: 'catalogo.zona_hidrografica (37 valores); observaciones.zonahidrografica']
+
+  indexes {
+    (area_hidrografica, nombre) [unique]
+  }
+}
+
+Table estacion {
+  id integer [pk, increment]
+  codigo varchar(10) [not null, unique, note: 'catalogo.codigo. TEXTO de 10 digitos CON ceros a la izquierda (observaciones.codigoestacion los trae; el catalogo a veces no). Normalizar con lpad al cargar']
+  nombre varchar(200) [not null]
+  categoria_id smallint [not null, ref: > categoria_estacion.id]
+  tecnologia_id smallint [not null, ref: > tecnologia_estacion.id]
+  estado estado_estacion [not null]
+  municipio_id integer [not null, ref: > municipio.id]
+  entidad_id integer [not null, ref: > entidad.id]
+  zona_hidrografica_id smallint [ref: > zona_hidrografica.id]
+  subzona_hidrografica varchar(80)
+  corriente varchar(120)
+  area_operativa varchar(80)
+  latitud numeric(12,9) [note: 'usar catalogo.latitud; NO ubicaci_n.latitude (viene invertida con longitud en el 99% de las filas)']
+  longitud numeric(12,9)
+  altitud integer [note: 'metros; 27 ceros en la muestra, validar si son reales']
+  fecha_instalacion date [note: 'origen: texto dd/mm/yyyy']
+  fecha_suspension date [note: 'origen: texto dd/mm/yyyy; nulo mientras activa']
+
+  indexes {
+    municipio_id
+  }
+}
+
+Table unidad_medida {
+  id smallint [pk, increment]
+  simbolo varchar(10) [not null, unique, note: 'observaciones.unidadmedida: %, °C, cm, deg, hPa, mm, m/s']
+}
+
+Table sensor {
+  id smallint [pk, increment]
+  codigo varchar(4) [not null, unique, note: 'observaciones.codigosensor, texto con ceros (ej. 0069)']
+  descripcion varchar(120) [not null, note: 'observaciones.descripcionsensor; la frecuencia (horaria, cada 10 minutos) solo viene dentro de este texto']
+  unidad_medida_id smallint [not null, ref: > unidad_medida.id]
+  // Una fila de la muestra (sensor 0245) trae descripcion y unidad nulas: decidir si descripcion/unidad admiten nulo.
+}
+
+Table observacion {
+  estacion_id integer [not null, ref: > estacion.id]
+  sensor_id smallint [not null, ref: > sensor.id]
+  fecha_observacion timestamptz [not null, note: 'origen floating timestamp en hora de Colombia (UTC-5); convertir a UTC al cargar']
+  valor numeric(14,4) [note: 'observaciones.valorobservado; 2131 ceros y 9 negativos en la muestra']
+
+  indexes {
+    (estacion_id, sensor_id, fecha_observacion) [pk, note: 'combinacion sin duplicados en la muestra (hallazgos P14)']
+    fecha_observacion
+  }
+
+  Note: '''
+    Origen 57sv-p2fu es una ventana movil de un dia (~157k filas): acumular historia con carga idempotente (ON CONFLICT DO NOTHING).
+    Se descartan nombreestacion, departamento, municipio, zonahidrografica, latitud y longitud de la observacion: duplican a estacion.
+    Candidata a particion por rango mensual de fecha_observacion (tuning E3).
+  '''
+}
+
+// ---------------------------------------------------------------- C) UPME
+Table fuente_combustible {
+  id smallint [pk, increment]
+  nombre varchar(30) [not null, unique, note: 'tq63-itzr.fuente (13 valores: ACPM, AGUA, BAGAZO, BIOGAS, BIOMASA, CARBON, COMBUSTOLEO, GAS, GLP, JET-A1, OTROS, RAD SOLAR, VIENTO)']
+}
+
+Table generacion_mensual_fuente {
+  ano smallint [not null, note: 'check ano between 2000 and 2100']
+  mes smallint [not null, note: 'check mes between 1 and 12']
+  fuente_id smallint [not null, ref: > fuente_combustible.id]
+  promedio_mensual_gwh numeric(14,6)
+  maximo_gwh numeric(14,6) [note: 'maximo diario del mes']
+  minimo_gwh numeric(14,6) [note: 'minimo diario del mes']
+  generacion_total_gwh numeric(14,6) [not null]
+  porcentaje_participacion numeric(8,5) [note: 'derivado: total de la fuente / total del mes. Guardar o recalcular?']
+
+  indexes {
+    (ano, mes, fuente_id) [pk, note: 'unica en las 2786 filas (muestra completa)']
+  }
+
+  Note: 'UPME en GWh, derivada de XM. Util para contrastar con la generacion de XM (kWh).'
+}
+
+// ---------------------------------------------------------------- D) XM (PENDIENTE)
+// vtmi-tusj y 8gum-9k6v son entradas federadas a SIMEM: no se conocen sus columnas reales.
+// Todo este bloque es hipotesis a validar contra la API/descarga de SIMEM y el listado de recursos (F07).
+Table tecnologia_generacion {
+  id smallint [pk, increment]
+  nombre varchar(40) [not null, unique]
+  fuente_combustible_id smallint [ref: > fuente_combustible.id, note: 'relacion con UPME sin confirmar (hallazgos P11); puede ser N:M']
+}
+
+Table planta {
+  id integer [pk, increment]
+  codigo varchar(20) [not null, unique, note: 'HIPOTESIS: llave de la planta en XM (hallazgos P03/P07)']
+  nombre varchar(200) [not null]
+  tecnologia_generacion_id smallint [ref: > tecnologia_generacion.id]
+  municipio_id integer [ref: > municipio.id]
+  capacidad_efectiva_mw numeric(10,3) [note: 'viene del listado de recursos F07, no de las 5 fuentes actuales']
+  operador varchar(200)
+}
+
+Enum tipo_serie_generacion {
+  real
+  programada_despacho
+  programada_redespacho
+}
+
+Table generacion_planta {
+  planta_id integer [not null, ref: > planta.id]
+  fecha_hora timestamptz [not null, note: 'granularidad por confirmar: hora o dia (hallazgos P01)']
+  tipo_serie tipo_serie_generacion [not null, note: 'vtmi-tusj trae las tres series; 8gum-9k6v solo la real (P05)']
+  energia_kwh numeric(18,3) [not null, note: '8gum-9k6v declara kWh (P02). Negativos/nulos: por verificar (P04)']
+
+  indexes {
+    (planta_id, fecha_hora, tipo_serie) [pk]
+    fecha_hora
+  }
+}
+
+// ---------------------------------------------------------------- E) Ingesta
+Table carga_ingesta {
+  id bigint [pk, increment]
+  dataset_id varchar(9) [not null, note: 'ID Socrata (vtmi-tusj, tq63-itzr, ...)']
+  iniciada_en timestamptz [not null]
+  finalizada_en timestamptz
+  filas_leidas integer
+  filas_insertadas integer
+  ventana_desde timestamptz [note: 'para la ventana movil de observaciones']
+  ventana_hasta timestamptz
+  estado varchar(15) [not null, note: 'en_curso | ok | error']
+}

@@ -1,0 +1,61 @@
+name: ideam_observaciones
+
+# Acumula la ventana movil de ~12 h de 57sv-p2fu cada 3 h (D06). Falla si hay un hueco entre corridas (DQ12).
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+# Una corrida a la vez: dos en paralelo compararian contra el mismo manifiesto previo.
+concurrency:
+  group: ideam-observaciones
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read   # leer el artefacto de la corrida anterior
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests pyyaml python-dotenv
+
+      - name: Restaurar el manifiesto de la corrida anterior
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=ideam-manifest&per_page=20" \
+            --jq '[.artifacts[] | select(.expired == false)][0].workflow_run.id // empty')
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" -n ideam-manifest -D data/raw/ideam_observaciones
+          else
+            echo "Sin manifiesto previo: primera corrida, no se puede detectar hueco."
+          fi
+
+      - name: Descargar observaciones (falla si hay hueco)
+        run: python -m pipeline.extract.ideam_observaciones
+
+      # if: always() para conservar los datos y el manifiesto aunque el job falle por un hueco
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ideam-datos-${{ github.run_id }}
+          path: data/raw/ideam_observaciones/*/*.json.gz
+          retention-days: 90
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ideam-manifest
+          path: data/raw/ideam_observaciones/manifest.jsonl
+          retention-days: 90
+          if-no-files-found: ignore

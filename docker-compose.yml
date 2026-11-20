@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION:?defina POSTGRES_VERSION en .env}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:-energia_db}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Solo se ejecuta al inicializar un volumen vacio
+      - ./sql/00_setup:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Herramientas de Python (extract/profiling). No arranca con `up`: se usa con `docker compose run --rm tools ...`
+  tools:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: pipeline/Dockerfile
+    user: "${UID_GID:-1000:1000}"  # evita archivos propiedad de root en data/ y docs/
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file:
+      - path: .env
+        required: false
+
+volumes:
+  pgdata:

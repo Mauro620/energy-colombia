@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secretos
+.env
+
+# Datos crudos (se regeneran con `make sample`); data/sample/ SI se versiona
+data/raw/*
+!data/raw/.gitkeep
+
+# Evidencias pesadas (videos, comprimidos, dumps)
+evidencias/**/*.mp4
+evidencias/**/*.mov
+evidencias/**/*.mkv
+evidencias/**/*.zip
+evidencias/**/*.7z
+evidencias/**/*.dump
+evidencias/**/*.backup
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
