@@ -11,6 +11,9 @@ services:
       - pgdata:/var/lib/postgresql/data
       # Solo se ejecuta al inicializar un volumen vacio
       - ./sql/00_setup:/docker-entrypoint-initdb.d:ro
+      # scripts SQL y CSV aplanados para `psql -f /sql/...` y \copy dentro del contenedor (scripts/e1.sh)
+      - ./sql:/sql:ro
+      - ./data/stage:/stage:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s

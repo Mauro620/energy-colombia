@@ -44,7 +44,7 @@ Enum control.estado_lote {
 Table energia.departamento {
   codigo char(2) [pk, note: 'src=divipola_vcjz-niiq.codigo_departamento || rule=CHECK 2 digitos (RN16)']
   nombre varchar(100) [not null, unique, note: 'src=divipola_vcjz-niiq.nombre_departamento || rule=UNIQUE']
-  nombre_normalizado varchar(100) [not null, note: 'src=- || rule=derivada GENERATED: upper+unaccent+trim de nombre. Clave de cruce con IDEAM (DQ14). Redundancia deliberada: columna calculada, no puede desincronizarse']
+  nombre_normalizado varchar(100) [not null, unique, note: 'src=- || rule=derivada GENERATED: upper+unaccent+trim de nombre. Clave de cruce con IDEAM (DQ14). Redundancia deliberada: columna calculada, no puede desincronizarse']
   latitud numeric(12,9) [note: 'src=divipola_vcjz-niiq.latitud || rule=CHECK dentro de Colombia (RN07); la fuente usa coma decimal']
   longitud numeric(12,9) [note: 'src=divipola_vcjz-niiq.longitud || rule=CHECK dentro de Colombia (RN07)']
 }

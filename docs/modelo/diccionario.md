@@ -10,7 +10,7 @@ Columnas: **tabla**, **columna**, **tipo**, **nulos** (Si = admite NULL), **regl
 |---|---|---|---|---|---|
 | departamento | codigo | char(2) | No | PK; CHECK 2 digitos (RN16) | divipola_vcjz-niiq.codigo_departamento |
 | departamento | nombre | varchar(100) | No | UNIQUE; UNIQUE | divipola_vcjz-niiq.nombre_departamento |
-| departamento | nombre_normalizado | varchar(100) | No | derivada GENERATED: upper+unaccent+trim de nombre. Clave de cruce con IDEAM (DQ14). Redundancia deliberada: columna calculada, no puede desincronizarse | - |
+| departamento | nombre_normalizado | varchar(100) | No | UNIQUE; derivada GENERATED: upper+unaccent+trim de nombre. Clave de cruce con IDEAM (DQ14). Redundancia deliberada: columna calculada, no puede desincronizarse | - |
 | departamento | latitud | numeric(12,9) | Si | CHECK dentro de Colombia (RN07); la fuente usa coma decimal | divipola_vcjz-niiq.latitud |
 | departamento | longitud | numeric(12,9) | Si | CHECK dentro de Colombia (RN07) | divipola_vcjz-niiq.longitud |
 | municipio | codigo | char(5) | No | PK; CHECK 5 digitos y prefijo = departamento_codigo (RN08, H08) | divipola_gdxc-w37w.cod_mpio |

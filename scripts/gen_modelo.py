@@ -187,11 +187,24 @@ def diccionario(tablas: dict[str, Tabla], enums: dict[str, list[str]]) -> str:
     return "\n".join(lineas) + "\n"
 
 
+def ddl_staging(tablas: dict[str, Tabla]) -> str:
+    """sql/01_ddl/016_staging.sql: tablas de staging (todo text) generadas desde el DBML para que no se desincronicen."""
+    lineas = ["-- GENERADO por scripts/gen_modelo.py desde docs/modelo/modelo_er.dbml. No editar a mano.",
+              "-- Staging: todo en text, sin restricciones, para que la carga nunca rechace filas (D04). El orden de columnas",
+              "-- es el de los CSV de data/stage (pipeline/transform/aplanar.py).", ""]
+    for nombre, t in tablas.items():
+        if nombre.startswith("staging."):
+            columnas = ",\n".join(f"  {c.nombre} {c.tipo}" for c in t.columnas)
+            lineas.append(f"CREATE TABLE IF NOT EXISTS {nombre} (\n{columnas}\n);\n")
+    return "\n".join(lineas)
+
+
 def main() -> int:
     tablas, enums = parsear((MODELO / "modelo_er.dbml").read_text(encoding="utf-8"))
     (MODELO / "modelo_er.mmd").write_text(mermaid(tablas), encoding="utf-8")
     (MODELO / "modelo_er.dot").write_text(dot(tablas), encoding="utf-8")
     (MODELO / "diccionario.md").write_text(diccionario(tablas, enums), encoding="utf-8")
+    (ROOT / "sql" / "01_ddl" / "016_staging.sql").write_text(ddl_staging(tablas), encoding="utf-8")
     n_cols = sum(len(t.columnas) for t in tablas.values())
     print(f"{len(tablas)} tablas, {n_cols} columnas, {len(enums)} enums, {sum(1 for t in tablas.values() for c in t.columnas if c.ref)} FK")
     return 0
