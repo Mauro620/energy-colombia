@@ -11,6 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = Path(os.getenv("ENERGIA_RAW_DIR", ROOT / "data" / "raw"))  # la variable permite probar sin tocar data/raw real
 SAMPLE = ROOT / "data" / "sample"
 FUENTES = ROOT / "docs" / "fuentes"
+CATALOGO = FUENTES / "catalogo"
+PERFILES = FUENTES / "perfiles"
 TIMEOUT = 120
 
 

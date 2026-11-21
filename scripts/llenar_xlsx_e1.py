@@ -13,7 +13,7 @@ from openpyxl import load_workbook
 import gen_modelo
 
 ROOT = Path(__file__).resolve().parents[1]
-XLSX = ROOT / "docs" / "Integridad_Restricciones_Energia.xlsx"
+XLSX = ROOT / "docs" / "modelo" / "Integridad_Restricciones_Energia.xlsx"
 STAGE = ROOT / "data" / "stage"
 PRIMERA_FILA = 5
 CODIGO_FUENTE = {"simem_E17D25": "F01", "simem_055A4D": "F02", "socrata_tq63-itzr": "F03", "socrata_hp9r-jxuu": "F04", "socrata_57sv-p2fu": "F05",

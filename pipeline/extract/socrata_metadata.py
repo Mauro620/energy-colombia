@@ -1,11 +1,11 @@
-"""Descarga la metadata de cada dataset Socrata y genera docs/fuentes/<id>.md."""
+"""Descarga la metadata de cada dataset Socrata y genera docs/fuentes/catalogo/<id>.md."""
 import json
 from datetime import datetime, timezone
 
 import requests
 
 from pipeline.common_raw import escribir_una_vez
-from pipeline.common import FUENTES, RAW, TIMEOUT, load_config, new_session
+from pipeline.common import CATALOGO, RAW, TIMEOUT, load_config, new_session
 
 
 def fetch_metadata(session: requests.Session, domain: str, dataset_id: str) -> dict:
@@ -105,7 +105,7 @@ def render_markdown(meta: dict, total_rows: int | None, domain: str, date_ranges
 def main() -> None:
     config = load_config()
     session = new_session()
-    FUENTES.mkdir(parents=True, exist_ok=True)
+    CATALOGO.mkdir(parents=True, exist_ok=True)
     for source in config["sources"]:
         dataset_id = source["id"]
         out_dir = RAW / dataset_id
@@ -121,7 +121,7 @@ def main() -> None:
             date_ranges = fetch_date_ranges(session, config["domain"], meta)
             escribir_una_vez(meta_path, json.dumps(meta, ensure_ascii=False, indent=2))
             escribir_una_vez(count_path, json.dumps({"total_rows": total, "date_ranges": date_ranges}))
-        (FUENTES / f"{dataset_id}.md").write_text(render_markdown(meta, total, config["domain"], date_ranges), encoding="utf-8")
+        (CATALOGO / f"{dataset_id}.md").write_text(render_markdown(meta, total, config["domain"], date_ranges), encoding="utf-8")
         print(f"{dataset_id}: {meta['name']} | filas={total}")
 
 

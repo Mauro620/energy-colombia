@@ -22,7 +22,7 @@ make up                         # PostgreSQL (version de POSTGRES_VERSION) con v
 make psql                       # consola en energia_db
 
 make sample                     # metadata + muestras -> data/raw/ (no versionado) y data/sample/*.csv
-make profile                    # perfiles + hallazgos -> docs/fuentes/
+make profile                    # perfiles -> docs/fuentes/perfiles/, hallazgos -> docs/fuentes/
 make down
 ```
 
@@ -35,8 +35,8 @@ Python corre dentro del contenedor `tools` (`pipeline/Dockerfile`): no hace falt
 
 | Comando (dentro del contenedor `tools`) | Que hace |
 |---|---|
-| `python -m pipeline.extract.simem_explorar` | Descubre el datasetId de F01/F02, extrae 2025-03-01 y escribe `docs/fuentes/simem_<id>.md` |
-| `python -m pipeline.extract.xm_listados` | Guarda `ListadoMetricas` y `ListadoRecursos` y escribe `docs/fuentes/xm_recursos.md` |
+| `python -m pipeline.extract.simem_explorar` | Descubre el datasetId de F01/F02, extrae 2025-03-01 y escribe `docs/fuentes/catalogo/simem_<id>.md` |
+| `python -m pipeline.extract.xm_listados` | Guarda `ListadoMetricas` y `ListadoRecursos` y escribe `docs/fuentes/catalogo/xm_recursos.md` |
 | `python -m pipeline.extract.simem_backfill --desde 2025-01-01 --hasta 2025-01-31` | Backfill de F01 en ventanas de 30 dias; reanudable |
 | `python -m pipeline.extract.ideam_observaciones` | Descarga completa de `57sv-p2fu` y detecta huecos (DQ12) |
 
@@ -67,7 +67,7 @@ Tambien desde la web: Actions > la corrida > seccion Artifacts. Las fechas del m
 ## Estructura
 
 ```
-docs/{fuentes,decisiones,modelo,informes}   sql/00_setup ... 08_tuning (numerados, idempotentes)
+docs/{fuentes/{catalogo,perfiles},decisiones,modelo,referencia,informes}   sql/00_setup ... 08_tuning (numerados, idempotentes)
 pipeline/{extract,profiling,transform,load,quality}   infra/aws
 data/raw (ignorado)  data/sample (versionado)   evidencias/{E1,E2,E3}
 ```

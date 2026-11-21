@@ -1,6 +1,6 @@
 """Perfila cada data/raw/<id>/sample.json.
 
-Salidas: docs/fuentes/perfil_<id>.md, docs/fuentes/perfil_columnas.csv (mismas columnas que la hoja
+Salidas: docs/fuentes/perfiles/perfil_<id>.md, docs/fuentes/perfiles/perfil_columnas.csv (mismas columnas que la hoja
 Perfil_columnas del xlsx) y, con --escribir-xlsx, esas filas en la hoja desde la fila 5.
 """
 import argparse
@@ -11,9 +11,9 @@ import re
 import pandas as pd
 from openpyxl import load_workbook
 
-from pipeline.common import FUENTES, RAW, ROOT, load_config
+from pipeline.common import PERFILES, RAW, ROOT, load_config
 
-XLSX = ROOT / "docs" / "Integridad_Restricciones_Energia.xlsx"
+XLSX = ROOT / "docs" / "modelo" / "Integridad_Restricciones_Energia.xlsx"
 HOJA = "Perfil_columnas"
 FILA_ENCABEZADO, FILA_INICIAL = 4, 5
 ISO = r"\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?)?"
@@ -211,12 +211,12 @@ def main() -> None:
         if r is None:
             print(f"{source['id']}: SALTADO, sin sample.json")
             continue
-        (FUENTES / f"perfil_{r['id']}.md").write_text(render_md(r), encoding="utf-8")
+        (PERFILES / f"perfil_{r['id']}.md").write_text(render_md(r), encoding="utf-8")
         resultados.append(r)
         print(f"{r['id']}: {len(r['columnas'])} columnas")
 
     filas = filas_hoja(resultados, encabezados, codigos)
-    pd.DataFrame(filas, columns=encabezados).to_csv(FUENTES / "perfil_columnas.csv", index=False)
+    pd.DataFrame(filas, columns=encabezados).to_csv(PERFILES / "perfil_columnas.csv", index=False)
     if args.escribir_xlsx:
         escribir_xlsx(wb, filas)
         print(f"{len(filas)} filas escritas en {HOJA}")

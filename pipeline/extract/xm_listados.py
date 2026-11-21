@@ -1,10 +1,10 @@
-"""Listados de la API XM: guarda el crudo de ListadoMetricas y ListadoRecursos y documenta docs/fuentes/xm_recursos.md."""
+"""Listados de la API XM: guarda el crudo de ListadoMetricas y ListadoRecursos y documenta docs/fuentes/catalogo/xm_recursos.md."""
 import json
 from datetime import datetime, timezone
 
 import pandas as pd
 
-from pipeline.common import FUENTES, RAW
+from pipeline.common import CATALOGO, RAW
 from pipeline.common_raw import leer_payload, registrar_error, solicitar, ventanas_pendientes, write_raw
 from pipeline.extract.simem_explorar import DIA
 
@@ -162,7 +162,7 @@ def escribir_md(fuente_recursos: str, fuente_metricas: str, hoy, recursos: pd.Da
         "## Cruce de la llave con SIMEM (P07)",
         "",
     ] + cruce_simem(recursos)
-    (FUENTES / "xm_recursos.md").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    (CATALOGO / "xm_recursos.md").write_text("\n".join(lineas) + "\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -172,7 +172,7 @@ def main() -> None:
     raw = json.loads(leer_payload(fuente_metricas, hoy, hoy))["Items"]
     metricas = pd.DataFrame([e["Values"] for i in raw for e in i["ListEntities"]])
     escribir_md(fuente_recursos, fuente_metricas, hoy, valores(fuente_recursos, hoy), metricas)
-    print("docs/fuentes/xm_recursos.md escrito")
+    print("docs/fuentes/catalogo/xm_recursos.md escrito")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Llena las hojas Int_dominio, Clave_primaria, Int_referencial, Restricciones, Dependencias_func y Dominios_ENUM y agrega las decisiones nuevas
-# en docs/Integridad_Restricciones_Energia.xlsx, leyendo el catalogo de la base energia_db YA creada (make e1). Respeta encabezados y formato.
+# en docs/modelo/Integridad_Restricciones_Energia.xlsx, leyendo el catalogo de la base energia_db YA creada (make e1). Respeta encabezados y formato.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [ -f .env ] && set -a && . ./.env && set +a

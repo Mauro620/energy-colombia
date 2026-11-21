@@ -1,4 +1,4 @@
-"""Explora SIMEM: descubre el datasetId de F01/F02, extrae un dia a data/raw y documenta docs/fuentes/simem_<datasetId>.md.
+"""Explora SIMEM: descubre el datasetId de F01/F02, extrae un dia a data/raw y documenta docs/fuentes/catalogo/simem_<datasetId>.md.
 
 No usa pydataxm. D01 (cliente propio con requests) y D02 (F01 vs F02) se validan aqui con evidencia.
 """
@@ -9,7 +9,7 @@ from datetime import date
 import pandas as pd
 import requests
 
-from pipeline.common import FUENTES, RAW, load_config
+from pipeline.common import CATALOGO, RAW, load_config
 from pipeline.common_raw import leer_payload, registrar_error, solicitar, ventanas_pendientes, write_raw
 from pipeline.profiling.perfilar import buscar_llaves
 
@@ -220,7 +220,7 @@ def escribir_md(ds: dict, resultado: dict, df: pd.DataFrame, dia: date, comparac
     lineas += ["", "## Zona horaria", ""]
     lineas += zona or [f"Sin hora en los datos (granularidad {meta['granularity']}): la zona no aplica a esta fecha."]
     lineas += ["", "## Comparacion F01 vs F02 (D02)", ""] + comparacion
-    (FUENTES / f"simem_{ds['dataset_id']}.md").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    (CATALOGO / f"simem_{ds['dataset_id']}.md").write_text("\n".join(lineas) + "\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -242,7 +242,7 @@ def main() -> None:
     for ds in datasets:
         resultado, df = cargados[ds["dataset_id"]]
         escribir_md(ds, resultado, df, dia, comparacion, zona if ds["dataset_id"] == horario else None, mayusculas)
-        print(f"docs/fuentes/simem_{ds['dataset_id']}.md escrito")
+        print(f"docs/fuentes/catalogo/simem_{ds['dataset_id']}.md escrito")
 
 
 if __name__ == "__main__":

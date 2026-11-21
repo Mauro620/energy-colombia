@@ -2,7 +2,7 @@
 
 - **Estado:** aceptada (los supuestos S-xx esperan validacion del equipo)
 - **Fecha:** 2026-11-20
-- **Evidencia:** `docs/fuentes/hallazgos.md`, `docs/fuentes/simem_*.md`, `docs/fuentes/xm_recursos.md`, hoja `Decisiones` del xlsx
+- **Evidencia:** `docs/fuentes/hallazgos.md`, `docs/fuentes/catalogo/simem_*.md`, `docs/fuentes/catalogo/xm_recursos.md`, hoja `Decisiones` del xlsx
 
 ## Decisiones aplicadas
 
@@ -24,7 +24,7 @@
 | **S-01** | Orden de las versiones de liquidacion: **TX1 < TX2 < TXR < TXF < TX3 < TX4** (la de mayor orden es la vigente). **SUPUESTO**: ni la metadata de SIMEM ni la documentacion de XM publican el orden | (a) En los meses recientes (2026-09 y 2026-10) solo existen TX1, TX2, TXR y TXF; TX3 aparece en los meses con 2 o mas meses de antiguedad y TX4 solo en meses mas viejos (en 2026-05 a 2026-10 no hay ninguna fila TX4; en 2025-03-01 si). (b) Noticias de XM: TX3 = "Ajuste #1" y TX4 = "Ajuste #2" de la liquidacion de un mes; TXR y TXF son las liquidaciones mensuales cercanas a la facturacion. Desconocido: el orden relativo entre TX1, TX2, TXR y TXF | Cambiar `energia.version_liquidacion.orden`: la carga y el trigger leen la tabla, no el codigo |
 | S-02 | Rangos plausibles por sensor (`valor_min`, `valor_max`) y centinelas propios. Limites fisicos para humedad, temperatura (DQ09: -15 a 50 C), viento; para el resto, la envolvente real redondeada. Son **provisionales**: salen de un solo dia (~12 h) de datos | Tabla en `sql/03_carga/036_sensores.sql`, con min/max reales | Ajustar cuando se acumule historia (E3) |
 | S-03 | La capacidad (kW) se asume constante durante la hora; energia horaria (kWh) <= capacidad x 1.10 (regla pedida) | 71 262 de 9 208 080 filas de 055A4D con capacidad la exceden (0.77 %); 884 de 246 886 en F01 (con capacidad x 24) | Subir o bajar la tolerancia |
-| S-04 | `ListadoRecursos`: 3 codigos repetidos. 2 con filas identicas (`5J8H`, `5PUN`): queda una. `PRG1` tiene dos nombres (`PROELECTRICA`, `PROELECTRICA 1`): queda la **ultima fila** del listado | `docs/fuentes/xm_recursos.md` | Elegir `PROELECTRICA` |
+| S-04 | `ListadoRecursos`: 3 codigos repetidos. 2 con filas identicas (`5J8H`, `5PUN`): queda una. `PRG1` tiene dos nombres (`PROELECTRICA`, `PROELECTRICA 1`): queda la **ultima fila** del listado | `docs/fuentes/catalogo/xm_recursos.md` | Elegir `PROELECTRICA` |
 | S-05 | `ListadoAgentes`: 5 codigos repetidos (`SPRG`, `NTCG`, `SOEC`, `EDQG`, `ETNC`): queda la fila `OPERACION` con `OperStartdate` mas reciente | 718 filas, 713 codigos | Conservar el historial en otra tabla |
 | S-06 | Catalogo IDEAM: 57 706 filas son 9 935 estaciones. El mismo codigo viene con 10 y con 8 digitos (sin ceros) y filas repetidas. Se normaliza con `lpad` a 10 y queda la fila de 10 digitos de menor posicion. 44 estaciones tienen un `estado` distinto entre sus filas: no se reconcilia | 18 446 codigos crudos, 9 935 normalizados; 100 % de los 634 codigos de observaciones existen en el catalogo normalizado | Reconciliar por fecha (el catalogo no la trae) |
 | S-07 | Cruce de estaciones con DIVIPOLA por (departamento, municipio) normalizados (upper, unaccent, trim, sin puntuacion). Lo que no cruza va a cuarentena, y con el sus observaciones | Cruce previo: 89.4 % de las estaciones (Bogota, Cali y Cucuta no cruzan por nombre). Ver el % real en `sql/05_pruebas` | Tabla de equivalencias manual (estaba en la hoja Decisiones y no en esta sesion) |
