@@ -1,13 +1,23 @@
--- Vistas del esquema analitica. Cada una indica la pregunta de negocio que responde. Idempotente (CREATE OR REPLACE).
+-- Vistas del esquema analitica. Idempotente (CREATE OR REPLACE). Cada vista lleva un bloque con la pregunta que responde.
+\pset null '(nulo)'
 
--- V1. Que porcentaje de la generacion mensual de UPME aporta cada fuente? (D09, H12: el porcentaje no se almacena, se calcula)
+/* ---------------------------------------------------------------------
+   V1  v_participacion_mensual_upme
+   Pregunta: que porcentaje de la generacion mensual de UPME aporta cada fuente?
+   Como: para cada fila (mes, fuente) divide su GWh entre la suma de todas las fuentes del mismo mes.
+         SUM() OVER (PARTITION BY periodo) calcula ese total sin agrupar. El porcentaje no se guarda: se calcula aqui (D09, H12).
+   --------------------------------------------------------------------- */
 CREATE OR REPLACE VIEW analitica.v_participacion_mensual_upme AS
 SELECT g.periodo, f.nombre AS fuente, g.generacion_total_gwh, g.parcial,
        round(100 * g.generacion_total_gwh / nullif(sum(g.generacion_total_gwh) OVER (PARTITION BY g.periodo), 0), 6) AS participacion_pct
 FROM energia.generacion_mensual_upme g
 JOIN energia.fuente_energetica f USING (fuente_energetica_id);
 
--- V2. Cuanta energia real y programada genero cada tecnologia por dia? (E17D25)
+/* ---------------------------------------------------------------------
+   V2  v_generacion_diaria_tecnologia
+   Pregunta: cuanta energia programada y real genero cada tecnologia por dia? (fuente E17D25, en kWh)
+   Como: une cada generacion diaria con su planta y su tecnologia y suma por (fecha, tecnologia).
+   --------------------------------------------------------------------- */
 CREATE OR REPLACE VIEW analitica.v_generacion_diaria_tecnologia AS
 SELECT d.fecha, t.nombre AS tecnologia, count(*) AS plantas,
        sum(d.programada_despacho_kwh) AS programada_despacho_kwh, sum(d.programada_redespacho_kwh) AS programada_redespacho_kwh,
@@ -17,7 +27,12 @@ JOIN energia.planta p USING (planta_id)
 JOIN energia.tecnologia t USING (tecnologia_id)
 GROUP BY d.fecha, t.nombre;
 
--- V3. Cuanto se desvio cada planta de lo programado (redespacho) en cada mes? Desviacion = real - programada.
+/* ---------------------------------------------------------------------
+   V3  v_desviacion_programado_real
+   Pregunta: cuanto se desvio cada planta de lo programado (redespacho) en cada mes?
+   Como: suma por planta y mes lo programado y lo real. Desviacion = real - programada; el porcentaje es esa
+         diferencia sobre lo programado (nullif evita dividir entre cero).
+   --------------------------------------------------------------------- */
 CREATE OR REPLACE VIEW analitica.v_desviacion_programado_real AS
 SELECT p.codigo AS planta, p.nombre, t.nombre AS tecnologia, date_trunc('month', d.fecha)::date AS mes,
        sum(d.programada_redespacho_kwh) AS programada_kwh, sum(d.real_estimada_kwh) AS real_kwh,
@@ -28,21 +43,33 @@ JOIN energia.planta p USING (planta_id)
 JOIN energia.tecnologia t USING (tecnologia_id)
 GROUP BY p.codigo, p.nombre, t.nombre, date_trunc('month', d.fecha);
 
--- V4. XM y UPME cuentan la misma generacion? Conciliacion por mes y fuente energetica (H13: no se suman, se comparan).
--- XM = real estimada de las plantas del listado (kWh -> GWh); UPME en GWh. FULL JOIN: muestra tambien los meses que solo tiene uno.
+/* ---------------------------------------------------------------------
+   V4  v_conciliacion_xm_upme
+   Pregunta: XM y UPME reportan la misma generacion? Comparacion por mes y fuente energetica (no se suman, H13).
+   Como: 1) CTE xm: real estimada diaria de XM sumada por mes y fuente, de kWh a GWh (/1e6).
+         2) La une con UPME (ya en GWh) por mes y fuente; solo salen los meses que tienen los dos.
+         3) Calcula la diferencia en GWh y en porcentaje sobre UPME. Para ver que meses solo tiene uno: consulta Q10.
+   --------------------------------------------------------------------- */
 CREATE OR REPLACE VIEW analitica.v_conciliacion_xm_upme AS
 WITH xm AS (
   SELECT date_trunc('month', d.fecha)::date AS periodo, p.fuente_energetica_id, sum(d.real_estimada_kwh) / 1e6 AS xm_gwh
-  FROM energia.generacion_diaria_planta d JOIN energia.planta p USING (planta_id)
+  FROM energia.generacion_diaria_planta d
+  JOIN energia.planta p USING (planta_id)
   GROUP BY 1, 2)
-SELECT coalesce(x.periodo, u.periodo) AS periodo, f.nombre AS fuente, round(x.xm_gwh, 3) AS xm_gwh, u.generacion_total_gwh AS upme_gwh,
+SELECT x.periodo, f.nombre AS fuente, round(x.xm_gwh, 3) AS xm_gwh, u.generacion_total_gwh AS upme_gwh,
        round(x.xm_gwh - u.generacion_total_gwh, 3) AS diferencia_gwh,
-       round(100 * (x.xm_gwh - u.generacion_total_gwh) / nullif(u.generacion_total_gwh, 0), 2) AS diferencia_pct, coalesce(u.parcial, false) AS upme_parcial
+       round(100 * (x.xm_gwh - u.generacion_total_gwh) / nullif(u.generacion_total_gwh, 0), 2) AS diferencia_pct,
+       u.parcial AS upme_parcial
 FROM xm x
-FULL JOIN energia.generacion_mensual_upme u ON u.periodo = x.periodo AND u.fuente_energetica_id = x.fuente_energetica_id
-JOIN energia.fuente_energetica f ON f.fuente_energetica_id = coalesce(x.fuente_energetica_id, u.fuente_energetica_id);
+JOIN energia.generacion_mensual_upme u ON u.periodo = x.periodo AND u.fuente_energetica_id = x.fuente_energetica_id
+JOIN energia.fuente_energetica f ON f.fuente_energetica_id = x.fuente_energetica_id;
 
--- V5. Que clima hubo cada dia en cada departamento? Valores sin centinelas ni fuera de rango: la carga ya los aparto (D08).
+/* ---------------------------------------------------------------------
+   V5  v_clima_diario_departamento
+   Pregunta: que clima hubo cada dia en cada departamento, por sensor?
+   Como: sigue la cadena observacion -> estacion -> municipio -> departamento y agrupa por dia (hora de Colombia),
+         departamento y sensor. Los centinelas y valores fuera de rango no estan: la carga ya los aparto (D08).
+   --------------------------------------------------------------------- */
 CREATE OR REPLACE VIEW analitica.v_clima_diario_departamento AS
 SELECT (o.fecha_observacion AT TIME ZONE 'America/Bogota')::date AS fecha, d.nombre AS departamento, s.codigo AS sensor,
        s.descripcion, u.simbolo AS unidad, count(*) AS lecturas, round(avg(o.valor), 3) AS promedio, min(o.valor) AS minimo, max(o.valor) AS maximo,
@@ -54,3 +81,12 @@ JOIN energia.estacion e USING (estacion_id)
 JOIN energia.municipio m ON m.codigo = e.municipio_codigo
 JOIN energia.departamento d ON d.codigo = m.departamento_codigo
 GROUP BY 1, d.nombre, s.codigo, s.descripcion, u.simbolo;
+
+-- Muestra de dos vistas
+\echo 'V1 participacion UPME, ultimo mes (parcial)'
+SELECT * FROM analitica.v_participacion_mensual_upme
+WHERE periodo = (SELECT max(periodo) FROM energia.generacion_mensual_upme)
+ORDER BY participacion_pct DESC LIMIT 5;
+
+\echo 'V4 conciliacion XM vs UPME, julio de 2026'
+SELECT * FROM analitica.v_conciliacion_xm_upme WHERE periodo = '2026-07-01' ORDER BY upme_gwh DESC;

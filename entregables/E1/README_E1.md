@@ -1,6 +1,6 @@
 # Entrega 1: modelado, ingesta y reglas (energia_db)
 
-Sistema Energetico Colombiano con datos abiertos de XM, UPME e IDEAM. PostgreSQL 16. Evidencia: `modelo_er.png/.svg/.dbml/.mmd`, `diccionario.md`, `01_ddl_energia.sql`, `02_consultas_y_pruebas.sql`, `ejecucion_log.txt`.
+Sistema Energetico Colombiano con datos abiertos de XM, UPME e IDEAM. PostgreSQL 16. Evidencia: `modelo_er.png/.svg/.dbml/.mmd`, `diccionario.md`, los `.sql` numerados `01` a `09` en orden de ejecucion (setup, tablas, reglas, vistas, consultas HAVING / ventana / JOINs, pruebas de reglas y de calidad) y `ejecucion_log.txt`.
 
 ## Fuentes y periodos (D07-rev)
 
@@ -21,7 +21,7 @@ Sistema Energetico Colombiano con datos abiertos de XM, UPME e IDEAM. PostgreSQL
 
 ## Limitaciones
 
-1. No hay ubicacion de plantas: clima y generacion se relacionan solo por tiempo (D14). La consulta Q14 devuelve 0 filas hoy porque las observaciones cubren 1 dia y la generacion diaria llega al 2026-10-31.
+1. No hay ubicacion de plantas: clima y generacion se relacionan solo por tiempo (D14). La consulta Q11 devuelve 0 filas hoy porque las observaciones cubren 1 dia y la generacion diaria llega al 2026-10-31.
 2. El cruce de estaciones con DIVIPOLA por nombre es del 89,5 %: Bogota, Cali y Cucuta no cruzan, y con ellas se pierde el 39,3 % de las observaciones (cuarentena DQ15).
 3. Plantas fuera del listado de recursos (134 en F01, 40 en F02) y recursos con capacidad que no estan en el listado van a cuarentena (RN17).
 4. Rangos de sensores provisionales (S-02): salen de ~12 h de datos.
