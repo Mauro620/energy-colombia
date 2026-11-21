@@ -12,6 +12,17 @@ bash scripts/xlsx_e1.sh        # llena las hojas del modelo del xlsx desde la ba
 bash scripts/empaquetar_e1.sh  # arma entregables/E1/
 ```
 
+## Inicio rapido (clon limpio, un solo comando)
+
+Requisitos: Docker Desktop con integracion WSL2 (Windows: Settings > Resources > WSL integration > Ubuntu) o Linux con Docker. Clonar dentro del sistema de archivos de WSL (`~`), no en `/mnt/c`.
+
+```bash
+git clone <URL_DEL_REPO> && cd <carpeta>
+bash scripts/desde_cero.sh
+```
+
+Crea `.env` si falta, construye la imagen `tools`, descarga `data/raw` (reintenta y se puede reanudar) y ejecuta la Entrega 1 (`scripts/e1.sh`, ~14 min mas la descarga). El log queda en `evidencias/E1/`. Las observaciones de IDEAM son una ventana movil: las cifras pueden diferir de las de `entregables/E1/`.
+
 ## Entorno
 
 Requisitos: Docker con Compose, `make`, Python 3.11+.
