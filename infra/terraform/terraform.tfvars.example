@@ -1,0 +1,2 @@
+# Copiar a terraform.tfvars (ignorado por git) y editar.
+allowed_cidrs = ["203.0.113.7/32"] # salida de infra/aws/mi_ip.sh

@@ -1,0 +1,36 @@
+=== 1. Marcador
+marcador creado a las 2026-11-26T03:54:00Z
+=== 2. Espera: latest-restorable-time debe superar el marcador
+03:54:02 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:54:33 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:55:05 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:55:37 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:56:08 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:56:40 latest-restorable-time=2026-11-26T03:47:59Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:57:12 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:57:44 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:58:16 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:58:47 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:59:19 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+03:59:51 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+04:00:22 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+04:00:54 latest-restorable-time=2026-11-26T03:53:00Z aun no supera 2026-11-26T03:54:00Z; espero 30 s
+latest-restorable-time=2026-11-26T03:58:00Z supera 2026-11-26T03:54:00Z
+=== 3. DELETE de un mes de generacion diaria
+mes 2026-09-01 antes del DELETE (filas | suma real_estimada_kwh): 18762 | 7495980743.0000
+mes 2026-09-01 despues del DELETE: 0 | 0 (DELETE a las 2026-11-26T04:01:31Z)
+=== 4. Restauracion a 2026-11-26T04:00:31Z (1 minuto antes del DELETE)
+04:01:35 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:02:07 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:02:39 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:03:11 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:03:43 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:04:15 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:04:47 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:05:18 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:05:50 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:06:25 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+04:06:57 latest-restorable-time=2026-11-26T03:58:00Z aun no supera 2026-11-26T04:00:31Z; espero 30 s
+latest-restorable-time=2026-11-26T04:03:00Z supera 2026-11-26T04:00:31Z
+
+aws: [ERROR]: An error occurred (InstanceQuotaExceeded) when calling the RestoreDBInstanceToPointInTime operation: You reached the maximum number of instances available with free plan accounts. To remove all limitations, upgrade your account plan.

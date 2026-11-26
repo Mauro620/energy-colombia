@@ -1,0 +1,53 @@
+ Container proyecto_final-db-1 Running 
+ Container proyecto_final-db-1 Waiting 
+ Container proyecto_final-db-1 Healthy 
+=== Paridad por tabla (tabla|filas|suma|min|max|md5)
+--- local
+agente|713||||be0c281b71dafe9750e9a0a9ff265b6e
+capacidad_planta|2568||||37f8f071c6c2cbe39db9525ee59b8952
+categoria_estacion|13||||cce7abe99140d18769cbb1d05d068a2d
+clasificacion_recurso|9||||081a0826c37d544ab7b26645729bcd32
+departamento|33||||c2abe9f7d9426064bb673ebf09c5fc28
+entidad|77||||395b7868d6e942ab33c892376f1f1252
+estacion|8897||||f6a4dfc4c12a92b1bb393c6822e19c75
+fuente_energetica|13||||9f1e9856075ce0643c3280d4542fe3d6
+generacion_diaria_planta|323995|157812024928.0000|2025-01-01|2026-10-31|
+generacion_horaria_planta|2695786|45396063025.4000|2026-05-01 05:00:00+00|2026-11-01 04:00:00+00|
+generacion_mensual_upme|2786|1653518.462466|2000-01-01|2026-08-01|
+municipio|1122||||9493aae288adf76ee56ac550beaf8f6f
+observacion|93667|6881539.2283|2026-11-19 16:05:00+00|2026-11-20 03:50:00+00|
+planta|2518||||b1b314093d2264a23239be20a676ef02
+sensor|18||||48292edafd200fcde04a466ba20e78b7
+tecnologia|5||||716c020e5ace8571e35f5a20e8d49233
+tecnologia_estacion|4||||6e0af3cc37c635b7e872801200b9147e
+unidad_medida|7||||6e6b1fdaaf04323eae01fb6084b08b66
+version_liquidacion|6||||1bf1e089f039b2fae5556167f1555a66
+zona_hidrografica|38||||fc074e498b297232cf3e8c2e6b175bd3
+--- RDS
+agente|713||||be0c281b71dafe9750e9a0a9ff265b6e
+capacidad_planta|2568||||37f8f071c6c2cbe39db9525ee59b8952
+categoria_estacion|13||||cce7abe99140d18769cbb1d05d068a2d
+clasificacion_recurso|9||||081a0826c37d544ab7b26645729bcd32
+departamento|33||||c2abe9f7d9426064bb673ebf09c5fc28
+entidad|77||||395b7868d6e942ab33c892376f1f1252
+estacion|8897||||f6a4dfc4c12a92b1bb393c6822e19c75
+fuente_energetica|13||||9f1e9856075ce0643c3280d4542fe3d6
+generacion_diaria_planta|323995|157812024928.0000|2025-01-01|2026-10-31|
+generacion_horaria_planta|2695786|45396063025.4000|2026-05-01 05:00:00+00|2026-11-01 04:00:00+00|
+generacion_mensual_upme|2786|1653518.462466|2000-01-01|2026-08-01|
+municipio|1122||||9493aae288adf76ee56ac550beaf8f6f
+observacion|93667|6881539.2283|2026-11-19 16:05:00+00|2026-11-20 03:50:00+00|
+planta|2518||||b1b314093d2264a23239be20a676ef02
+sensor|18||||48292edafd200fcde04a466ba20e78b7
+tecnologia|5||||716c020e5ace8571e35f5a20e8d49233
+tecnologia_estacion|4||||6e0af3cc37c635b7e872801200b9147e
+unidad_medida|7||||6e6b1fdaaf04323eae01fb6084b08b66
+version_liquidacion|6||||1bf1e089f039b2fae5556167f1555a66
+zona_hidrografica|38||||fc074e498b297232cf3e8c2e6b175bd3
+PARIDAD: PASS (20 tablas identicas)
+
+=== Bateria de pruebas E1 (051 y 052) en local y en RDS
+051_pruebas_reglas: local PASS=55 FAIL=0 | RDS PASS=55 FAIL=0
+051_pruebas_reglas: mismos resultados: PASS
+052_pruebas_calidad: local PASS=12 FAIL=0 | RDS PASS=12 FAIL=0
+052_pruebas_calidad: mismos resultados: PASS

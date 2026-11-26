@@ -1,0 +1,24 @@
+ Container proyecto_final-db-1 Running 
+ Container proyecto_final-db-1 Waiting 
+ Container proyecto_final-db-1 Healthy 
+=== RDS: wal_level
+=== RDS: tabla de control y verificacion de claves primarias
+todas las tablas publicadas tienen PK
+=== RDS: usuario replicador y publicacion (publish_via_partition_root=false)
+=== Local: base energia_replica con el DDL de E1 (sql/00_setup/002 y sql/01_ddl/011..015)
+=== Local: suscripcion sub_energia (verify-full con el bundle CA de RDS)
+ proyecto_final-db-1 Copying /home/mcorreace/Documents/Mauro_personal/IUE/Admindb/Proyecto_final/infra/aws/certs/global-bundle.pem to proyecto_final-db-1:/tmp/global-bundle.pem
+ proyecto_final-db-1 Copied /home/mcorreace/Documents/Mauro_personal/IUE/Admindb/Proyecto_final/infra/aws/certs/global-bundle.pem to proyecto_final-db-1:/tmp/global-bundle.pem
+NOTICE:  created replication slot "sub_energia" on publisher
+=== Espera de la sincronizacion inicial (srsubstate = r en todas las tablas)
+03:51:20 tablas pendientes: 21
+03:51:31 tablas pendientes: 13
+03:51:41 tablas pendientes: 4
+03:51:52 tablas pendientes: 1
+03:52:02 tablas pendientes: 1
+03:52:12 tablas pendientes: 0
+   subname   | pid  | received_lsn |       latest_end_time        
+-------------+------+--------------+------------------------------
+ sub_energia | 2988 | 0/BC040130   | 2026-11-26 03:51:56.64763+00
+(1 row)
+

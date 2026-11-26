@@ -1,0 +1,7 @@
+ Container proyecto_final-db-1 Running 
+ Container proyecto_final-db-1 Waiting 
+ Container proyecto_final-db-1 Healthy 
+mes 2026-09-01: local = 18762 | 7495980743.0000 | RDS = 0 | 0
+=== Copia local -> RDS
+mes 2026-09-01 en RDS tras reponer: 18762 | 7495980743.0000 (esperado: 18762 | 7495980743.0000)
+REPOSICION: PASS

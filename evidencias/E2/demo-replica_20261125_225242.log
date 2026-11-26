@@ -1,0 +1,33 @@
+=== INSERT
+INSERT: visible en local tras 376 ms
+     id     |      texto       |        actualizado_en         
+------------+------------------+-------------------------------
+ 1795665169 | insertado en RDS | 2026-11-26 03:52:51.105259+00
+(1 row)
+
+=== UPDATE
+UPDATE: visible en local tras 292 ms
+     id     |       texto        |        actualizado_en        
+------------+--------------------+------------------------------
+ 1795665169 | actualizado en RDS | 2026-11-26 03:52:53.68169+00
+(1 row)
+
+=== DELETE
+DELETE: visible en local tras 339 ms
+ filas_con_ese_id 
+------------------
+                0
+(1 row)
+
+=== Local: pg_stat_subscription
+   subname   | pid  | received_lsn |      last_msg_send_time       |     last_msg_receipt_time     | latest_end_lsn |        latest_end_time        
+-------------+------+--------------+-------------------------------+-------------------------------+----------------+-------------------------------
+ sub_energia | 2988 | 0/BC0409F8   | 2026-11-26 03:52:55.958726+00 | 2026-11-26 03:52:56.009952+00 | 0/BC0409F8     | 2026-11-26 03:52:55.958726+00
+(1 row)
+
+=== RDS: pg_replication_slots
+  slot_name  |  plugin  | slot_type | active | restart_lsn | confirmed_flush_lsn 
+-------------+----------+-----------+--------+-------------+---------------------
+ sub_energia | pgoutput | logical   | t      | 0/BC040490  | 0/BC0409F8
+(1 row)
+
